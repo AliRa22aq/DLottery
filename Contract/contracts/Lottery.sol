@@ -14,13 +14,13 @@ contract Lottery is Ownable {
     EnumerableSet.UintSet private activeLotteries;
 
     uint public LotteriesCount;    
-    address OURAddress;
-    uint minTokenRequire = 10_000;
+    address public OURAddress;
+    uint public minTokenRequire = 10_000;
+    uint public maxTicketLimit = 10;
 
     mapping(address => uint) userActiveLotteryID;
     mapping(address => uint[]) userLotteriesIDList;
-
-    mapping(uint => LotteryInfo) lotteryInfo;
+    mapping(uint => LotteryInfo) public lotteryInfo;
 
     struct LotteryInfo {
         uint id;
@@ -28,7 +28,10 @@ contract Lottery is Ownable {
         uint priceOfTicket;
         uint startingtime;
         uint endingtime;
+        address[] partipants;
         uint countOfParticipants;
+        mapping(address =>  uint) userTickets;
+        uint countOfTickets;
         uint accumulatedFunds;
         address winner;
         uint prize;
@@ -78,8 +81,6 @@ contract Lottery is Ownable {
         addLottery(LotteriesCount);
         userActiveLotteryID[_msgSender()] = LotteriesCount;
         userLotteriesIDList[_msgSender()].push(LotteriesCount);
-
-        // IERC20(OURAddress).transferFrom(_msgSender(), address(this), _numOfTokens);
     
         lotteryInfo[LotteriesCount].id = LotteriesCount;
         lotteryInfo[LotteriesCount].owner= _msgSender();
@@ -90,11 +91,34 @@ contract Lottery is Ownable {
     }
 
     function buyATicket(uint _id, uint tickets) public isLotteryActive(_id){
+        require(tickets <= maxTicketLimit, "Cannt by more than Max limit in one trasaction");
+        
+        require(
+            IERC20(OURAddress).transferFrom(_msgSender(), address(this), tickets*lotteryInfo[_id].priceOfTicket), 
+            "Insufficient Balance"
+            );
 
+        for(uint i = 1; i <= tickets; i++ ){
+            lotteryInfo[_id].partipants.push(_msgSender());
+            lotteryInfo[_id].userTickets[_msgSender()]++;
+            lotteryInfo[_id].countOfTickets++;
+        }
+        
+        lotteryInfo[_id].countOfParticipants++;
+    
     }
 
     function EndALottery() public {
         require(userActiveLotteryID[_msgSender()] != 0 , "No lottery to end");
+
+        // Find ransomeness
+
+        // Choose winner
+
+        // Distribute prize
+
+        // Clear Data from active list
+
         removeUser();
         removeLottery(userActiveLotteryID[_msgSender()]);
         delete userActiveLotteryID[_msgSender()];
@@ -124,6 +148,10 @@ contract Lottery is Ownable {
         OURAddress = _address;
     }
 
+    function updateMmxTicketLimit(uint _maxTicketLimit) public onlyOwner {
+        maxTicketLimit = _maxTicketLimit;
+    }
+    
     function updateMinTokenRequire(uint _minToken) public onlyOwner {
         minTokenRequire = _minToken;
     }
@@ -145,3 +173,7 @@ contract Lottery is Ownable {
 // Anyone can launch a lottery if he has a holding of 10000 OUR tokens using “NO HOUSE” advantage of the Token’s unique protocol.
 // Example: A person in the ecosystem wants to launch a lottery he can sell tickets with a pre-defined price in OUR tokens and time left for the draw.
 // Any others who wants to participate in this lottery will purchases the ticket within the cut-off time. After the draw is over and the winner is selected 90% of pooled amount will be transferred to the winner’s wallet and the person who launched a lottery will receive a commission of 3% of the pooled amount. And 4% from the balance will be transferred to the “Lifetime lottery Model”. Balance 3% will be used for the administration purpose.
+
+
+// 92% winner 4% commision 4% admin
+

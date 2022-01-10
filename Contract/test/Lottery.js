@@ -22,19 +22,124 @@ contract("LockerFactory", (accounts) => {
   const devTeam = accounts[8];
   const dev = accounts[9];
 
-//   const mintTokens = async (user) => {
-//     await testCoin._mint(user, 20000000000000, { from: user });
-//     await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user });
-//     const userBalance = await testCoin.balanceOf(user);
-//     return userBalance;
-//   }
+  const startALottery = async () => {
+    const latestTime = Number((await time.latest()));
+    const OneDayDuration = Number(await time.duration.days(1));
+
+    await lottery.updateCriteriaToken(testCoinAddress);
+
+    await testCoin._mint(user1, 10_000, { from: user1 });
+    await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+
+    const lotteryID = await lottery.lotteriesCount();
+    
+    return lotteryID;
+  }
+
+  const startALotteryWith5Participants = async () => {
+
+    const latestTime = Number((await time.latest()));
+    const OneDayDuration = Number(await time.duration.days(1));
+
+    await lottery.updateCriteriaToken(testCoinAddress);
+
+    await testCoin._mint(user1, 10_000, { from: user1 });
+    await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+
+    const lotteryID = await lottery.lotteriesCount();
+
+    await testCoin._mint(user2, 1000);
+    await testCoin.approve(lotteryAddress, 1000, { from: user2 });
+    await lottery.buyATicket(lotteryID, 10, {from: user2});
+
+    await testCoin._mint(user3, 1000);
+    await testCoin.approve(lotteryAddress, 1000, { from: user3 });
+    await lottery.buyATicket(lotteryID, 10, {from: user3});
+
+    await testCoin._mint(user4, 1000);
+    await testCoin.approve(lotteryAddress, 1000, { from: user4 });
+    await lottery.buyATicket(lotteryID, 10, {from: user4});
+
+    // await testCoin._mint(user5, 1000);
+    // await testCoin.approve(lotteryAddress, 1000, { from: user5 });
+    // await lottery.buyATicket(lotteryID, 10, {from: user5});
+
+    // await testCoin._mint(user6, 1000);
+    // await testCoin.approve(lotteryAddress, 1000, { from: user6 });
+    // await lottery.buyATicket(lotteryID, 10, {from: user6});
+    
+    return lotteryID;
+
+  }
+
+  // const startALotteryWith5Participants = async () => {
+    
+  //   const lotteryID = await startALottery();
+
+  //   await testCoin._mint(user2, 1000);
+  //   await testCoin.approve(lotteryAddress, 1000, { from: user2 });
+  //   await lottery.buyATicket(lotteryID, 10, {from: user2});
+
+  //   await testCoin._mint(user3, 1000);
+  //   await testCoin.approve(lotteryAddress, 1000, { from: user3 });
+  //   await lottery.buyATicket(lotteryID, 10, {from: user3});
+
+  //   await testCoin._mint(user4, 1000);
+  //   await testCoin.approve(lotteryAddress, 1000, { from: user4 });
+  //   await lottery.buyATicket(lotteryID, 10, {from: user4});
+
+  //   await testCoin._mint(user5, 1000);
+  //   await testCoin.approve(lotteryAddress, 1000, { from: user5 });
+  //   await lottery.buyATicket(lotteryID, 10, {from: user5});
+
+  //   await testCoin._mint(user6, 1000);
+  //   await testCoin.approve(lotteryAddress, 1000, { from: user6 });
+  //   await lottery.buyATicket(lotteryID, 10, {from: user6});
+
+  //   // await time.increase(time.duration.days(1));
+
+    
+  //   // await lottery.endALottery({from: user1});
+    
+
+  //   // console.log("======== Players ========");
+
+  //   // console.log(user2);
+  //   // console.log(user3);
+  //   // console.log(user4);
+  //   // console.log(user5);
+  //   // console.log(user6);
+
+  //   // console.log("======== lotteryInfo ========");
+
+  //   // const lotteryInfo = await lottery.lotteryInfo(lotteryID);
+  //   // console.log(String(lotteryInfo.staus))
+  //   // console.log(String(lotteryInfo.countOfParticipants))
+  //   // console.log(String(lotteryInfo.countOfTickets))
+  //   // console.log(String(lotteryInfo.accumulatedFunds))
+  //   // console.log(String(lotteryInfo.winner))
+  //   // console.log(String(lotteryInfo.prize))
+  //   // console.log(String(lotteryInfo.ownerCommision))
+
+  //   // console.log("******* Rewards *******");
+  //   // const ownerBalance = await testCoin.balanceOf(user1);
+  //   // console.log(String(ownerBalance))
+
+  //   // const winnerBalance = await testCoin.balanceOf(lotteryInfo.winner);
+  //   // console.log(String(winnerBalance))
+
+
+
+
+  // }
 
   beforeEach(async () => {
+    testCoin = await TestCoin.new();
+    testCoinAddress = await testCoin.address;
+
     lottery = await lotteryContract.new();
     lotteryAddress = await lottery.address;
 
-    testCoin = await TestCoin.new();
-    testCoinAddress = await testCoin.address;
 
   });
 
@@ -52,570 +157,497 @@ contract("LockerFactory", (accounts) => {
               
   });
 
-//   describe("Owner =>", () => {
+  describe("Owner =>", () => {
 
-//     it("can update the fees", async () => {
+    it("can update mintokenRequired", async () => {
  
-//       let lockFee;
-//       let updateLokcerFee;
+      let minTokenRequire;
 
-//       lockFee = await lockerFactory.lockFee();
-//       assert.equal(String(lockFee), web3.utils.toWei('0.1', 'ether'));
+      minTokenRequire = await lottery.minTokenRequire();
+      assert.equal(String(minTokenRequire), "10000");
 
-//       updateLokcerFee = await lockerFactory.updateLokcerFee();
-//       assert.equal(String(updateLokcerFee), web3.utils.toWei('0.05', 'ether'));
+      await lottery.updateMinTokenRequire(15000);
+
+      minTokenRequire = await lottery.minTokenRequire();
+      assert.equal(String(minTokenRequire), "15000");
+
+    });
+
+    it("can update maxTicketLimit", async () => {
+ 
+      let maxTicketLimit;
+      
+      maxTicketLimit = await lottery.maxTicketLimit();
+      assert.equal(String(maxTicketLimit), "10");
         
-//       await lockerFactory.updateFees(web3.utils.toWei('0.2', 'ether'), web3.utils.toWei('0.1', 'ether'));
+      await lottery.updateMaxTicketLimit(20);
 
-//       lockFee = await lockerFactory.lockFee();
-//       assert.equal(String(lockFee), web3.utils.toWei('0.2', 'ether'));
-
-//       updateLokcerFee = await lockerFactory.updateLokcerFee();
-//       assert.equal(String(updateLokcerFee), web3.utils.toWei('0.1', 'ether'));
+      maxTicketLimit = await lottery.maxTicketLimit();
+      assert.equal(String(maxTicketLimit), "20");
 
 
-//     });
-    
-//     it("can withdraw all the funds", async () => {
+    });
+
+    it("can update criteriaToken", async () => {
  
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-//       let contractBalance;
-//       let ownerBalance;
+      let criteriaToken;
+        
+      await lottery.updateCriteriaToken(testCoinAddress);
+
+      criteriaToken  = await lottery.OURAddress();
+      assert.equal(String(criteriaToken), testCoinAddress);
 
 
-//       let testCoin1 = await TestCoin.new();
-//       testCoinAddress1 = await testCoin1.address;
+    });
+    
+    it("can withdraw total earnings from contract", async () => {
 
-//       await testCoin1._mint(user1, 5000000000000, { from: user1 });
-//       await testCoin1.approve(lockerFactoryAddress, 5000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress1, 5000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+      let contractBalance;
+      let masterBalance;
 
+      await startALotteryWith5Participants();
 
-//       let testCoin2 = await TestCoin.new();
-//       testCoinAddress2 = await testCoin2.address;
+      await time.increase(time.duration.days(1));
 
-//       await testCoin2._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin2.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress2, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+      await lottery.endALottery({from: user1});
 
-//       let testCoin3 = await TestCoin.new();
-//       testCoinAddress3 = await testCoin3.address;
+      masterBalance = await testCoin.balanceOf(owner);
+      // console.log("Before widthdrawing, owner", String(masterBalance));
 
-//       await testCoin3._mint(user1, 10000000000000, { from: user1 });
-//       await testCoin3.approve(lockerFactoryAddress, 10000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress3, 10000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+      contractBalance = await testCoin.balanceOf(lotteryAddress);
+      // console.log("Before widthdrawing, contract", String(contractBalance));
+
+      await lottery.withdrawFunds();
+
+      
+      masterBalance = await testCoin.balanceOf(owner);
+      // console.log("After widthdrawing, owner", String(masterBalance));
+      
+      contractBalance = await testCoin.balanceOf(lotteryAddress);
+      // console.log("After widthdrawing, contract", String(contractBalance));
+
+    })
+
+  });
   
-//       const info1 = await lockerFactory.loker(1);
-//       const info2 = await lockerFactory.loker(2);
-//       const info3 = await lockerFactory.loker(3);
+  describe("Owner of the lottery =>", () => {
+
+    it("cannot start a lottery with expiry time less than 6 hours", async () => {
+      const latestTime = Number((await time.latest()));
+      const fiveHoursDuration = Number(await time.duration.hours(5));
+  
+      await lottery.updateCriteriaToken(testCoinAddress);
+
+      await testCoin._mint(user1, 10_000, { from: user1 });
+
+      let err = false;
+
+      try {
+        await lottery.startALottery(100, latestTime + fiveHoursDuration, {from: user1});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
+
+    })
+
+    it("cannot start a lottery with expiry time more than 120 days", async () => {
+      const latestTime = Number((await time.latest()));
+      const oneTwentyoneDaysDuration = Number(await time.duration.days(121));
+  
+      await lottery.updateCriteriaToken(testCoinAddress);
+
+      await testCoin._mint(user1, 10_000, { from: user1 });
+
+      let err = false;
+
+      try {
+        await lottery.startALottery(100, latestTime + oneTwentyoneDaysDuration, {from: user1});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
+    
+    })
+
+    it("cannot start a lottery if doesn't hold required tokens", async () => {
+      const latestTime = Number((await time.latest()));
+      const OneDayDuration = Number(await time.duration.days(1));
+  
+      await lottery.updateCriteriaToken(testCoinAddress);
+  
+      let err = false;
+
+      try {
+        await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
 
 
+  
+    })
 
+    it("can start a lottery if he hold required tokens", async () => {
+      const latestTime = Number((await time.latest()));
+      const OneDayDuration = Number(await time.duration.days(1));
+  
+      await lottery.updateCriteriaToken(testCoinAddress);
 
-//       const locker1_balance =  await testCoin1.balanceOf(info1.lockerAddress);
-//       const locker2_balance =  await testCoin2.balanceOf(info2.lockerAddress);
-//       const locker3_balance =  await testCoin3.balanceOf(info3.lockerAddress);
+      await testCoin._mint(user1, 10_000, { from: user1 });
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
 
+      const lotteryID = await lottery.lotteriesCount();
+      // console.log(Number(lotteryID))
+      assert.equal(Number(lotteryID), 1);
+  
+    })
 
-//       assert.equal(Number(locker1_balance), 5000000000000 );
-//       assert.equal(Number(locker2_balance), 20000000000000 );
-//       assert.equal(Number(locker3_balance), 10000000000000 );
+    it("cannot start more than one lottery at the same time", async () => {
+      const latestTime = Number((await time.latest()));
+      const OneDayDuration = Number(await time.duration.days(1));
+  
+      await lottery.updateCriteriaToken(testCoinAddress);
 
+      await testCoin._mint(user1, 10_000, { from: user1 });
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
 
-//       const tracker = await balance.tracker(owner);
+      const lotteryID = await lottery.lotteriesCount();
+      // console.log(Number(lotteryID))
+      assert.equal(Number(lotteryID), 1);
 
+      let err = false;
+      try {
+        await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
 
-//       contractBalance = await web3.eth.getBalance(lockerFactoryAddress);
-//       assert.equal(web3.utils.fromWei(contractBalance, 'ether'), "0.3");
+  
+    })
 
+    it("Can start another lottery after ending the previous one", async () => {
 
-//       let err = false;
-//       try{
-//           await lockerFactory.withdrawFunds({from: user2});
-//       }
-//       catch(e){
-//         // console.log(e.reason);
-//         err = true;
-//       }
-//       assert.equal(err, true);
+      let lotteryID;
+      let lotteryInfo;
 
-//       await lockerFactory.withdrawFunds({from: owner});
+      lotteryID = await startALotteryWith5Participants();
 
-//       contractBalance = await web3.eth.getBalance(lockerFactoryAddress);
-//       assert.equal(web3.utils.fromWei(contractBalance, 'ether'), "0");
+      lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      assert.equal(Number(lotteryInfo.staus), 0 );
 
-//       let { delta, fees } = await tracker.deltaWithFees();
-//       const earning = String(Number(delta) + Number(fees))
-//       assert.equal(web3.utils.fromWei(earning, 'ether'), "0.3");
+      await time.increase(time.duration.days(1));
 
-//     });
-//   });
+      await lottery.endALottery({from: user1});
 
-//   describe("Contract =>", () => {
+      lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      assert.equal(Number(lotteryInfo.staus), 1 );
 
-//     it("will hold all the tokens locked init", async () => {
+      lotteryID = await startALotteryWith5Participants();
+      lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      // console.log(Number(lotteryID));
+      assert.equal(Number(lotteryInfo.staus), 0 );
  
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
+    })
 
-//       let testCoin1 = await TestCoin.new();
-//       testCoinAddress1 = await testCoin1.address;
-
-//       await testCoin1._mint(user1, 5000000000000, { from: user1 });
-//       await testCoin1.approve(lockerFactoryAddress, 5000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress1, 5000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-
-//       let testCoin2 = await TestCoin.new();
-//       testCoinAddress2 = await testCoin2.address;
-
-//       await testCoin2._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin2.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress2, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-//       let testCoin3 = await TestCoin.new();
-//       testCoinAddress3 = await testCoin3.address;
-
-//       await testCoin3._mint(user1, 10000000000000, { from: user1 });
-//       await testCoin3.approve(lockerFactoryAddress, 10000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress3, 10000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-  
-//       const info1 = await lockerFactory.loker(1);
-//       const info2 = await lockerFactory.loker(2);
-//       const info3 = await lockerFactory.loker(3);
-
-//       const locker1_balance =  await testCoin1.balanceOf(info1.lockerAddress);
-//       const locker2_balance =  await testCoin2.balanceOf(info2.lockerAddress);
-//       const locker3_balance =  await testCoin3.balanceOf(info3.lockerAddress);
-
-//       assert.equal(Number(locker1_balance), 5000000000000 );
-//       assert.equal(Number(locker2_balance), 20000000000000 );
-//       assert.equal(Number(locker3_balance), 10000000000000 );
-    
-
-//     });
-
-//     it("will hold all the fees from all locker creation and update", async () => {
- 
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       let testCoin1 = await TestCoin.new();
-//       testCoinAddress1 = await testCoin1.address;
-
-//       await testCoin1._mint(user1, 10000000000000, { from: user1 });
-//       await testCoin1.approve(lockerFactoryAddress, 10000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress1, 5000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-
-//       let testCoin2 = await TestCoin.new();
-//       testCoinAddress2 = await testCoin2.address;
-
-//       await testCoin2._mint(user1, 40000000000000, { from: user1 });
-//       await testCoin2.approve(lockerFactoryAddress, 40000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress2, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-//       let testCoin3 = await TestCoin.new();
-//       testCoinAddress3 = await testCoin3.address;
-
-//       await testCoin3._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin3.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress3, 10000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-  
-//       await lockerFactory.addTokenstoALocker(1, 5000000000000, {from: user1, value: web3.utils.toWei('0.05', 'ether')}); 
-//       await lockerFactory.addTokenstoALocker(2, 20000000000000, {from: user1, value: web3.utils.toWei('0.05', 'ether')}); 
-//       await lockerFactory.addTokenstoALocker(3, 10000000000000, {from: user1, value: web3.utils.toWei('0.05', 'ether')}); 
-
-//       const contractBalance = await web3.eth.getBalance(lockerFactoryAddress);
-//       assert.equal(web3.utils.fromWei(contractBalance, 'ether'), "0.45");
-    
-
-//     });
-            
-//   });
-
-
-//   describe("Locking =>", () => {
-
-//     it("User can lock tokens", async () => {
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       await testCoin._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-    
-//     });
-      
-//     it("after locking, anyone can see his locked token info", async () => {
-
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-      
-//       await testCoin._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-//       const locksListbyUser =  await lockerFactory.getLockersListbyUser(user1);
-//       assert.equal(Number(locksListbyUser), 1);
-
-  
-//       const locksListbyToken =  await lockerFactory.getLockersListbyToken(testCoinAddress, {from: user1});
-//       assert.equal(Number(locksListbyToken), 1);
-
-//       const lockerInfo =  await lockerFactory.loker(1);
-
-//       const contractBalance = await testCoin.balanceOf(lockerInfo.lockerAddress);
-//       assert.equal(Number(contractBalance), 20000000000000);
-  
-//       assert.equal(Number(lockerInfo.id), 1);
-//       assert.equal(String(lockerInfo.owner), user1);
-//       assert.equal(String(lockerInfo.tokenAddress), testCoinAddress);
-//       assert.equal(Number(lockerInfo.numOfTokens), 20000000000000);
-//       assert.equal(Number(lockerInfo.unlockTime) , latestTime + OneYearsduration);
-//       assert.equal(Number(lockerInfo.status), 0);
-
-
-//     })
-
-//     it("after locking, user can add more tokens to the lock by paying update fee", async () => {
-               
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       let lockerBalance;
-//       let lockerInfo;
-
-//       await testCoin._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-//       lockerInfo =  await lockerFactory.loker(1);
-
-//       lockerBalance = await testCoin.balanceOf(lockerInfo.lockerAddress);
-//       assert.equal(Number(lockerBalance), 20000000000000);
-  
-//       assert.equal(Number(lockerInfo.numOfTokens), 20000000000000);
-
-//       await testCoin._mint(user1, 10000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 10000000000000, { from: user1 });
-//       await lockerFactory.addTokenstoALocker(1, 10000000000000, {from: user1, value: web3.utils.toWei('0.05', 'ether')}); 
-
-//       lockerInfo =  await lockerFactory.loker(1);
-      
-//       lockerBalance = await testCoin.balanceOf(lockerInfo.lockerAddress);
-//       assert.equal(Number(lockerBalance), 30000000000000);
-  
-//       assert.equal(Number(lockerInfo.numOfTokens), 30000000000000);
-
-//     })
-
-//     it("after locking, user can increase the locking period by paying update fee", async () => {
-      
-//       let lock1details;
-
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       await testCoin._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-  
-//       await lockerFactory.increaseLocktime(1, OneYearsduration, {from: user1, value: web3.utils.toWei('0.05', 'ether')}); 
-      
-//       lock1details =  await lockerFactory.loker(1);
-//       assert.equal(Number(lock1details.unlockTime), latestTime + 2*OneYearsduration);
-
-//     })
-
-
-
-
-//     it("User can create multiple lockers", async () => {
+    it("cannot end the lottery before the expiry time reach", async () => {
    
-//         const latestTime = Number((await time.latest()));
-//         const OneYearsduration = Number(await time.duration.years(1));
+      await startALotteryWith5Participants();
 
-//         let testCoin1 = await TestCoin.new();
-//         testCoinAddress1 = await testCoin1.address;
+      let err = false;
+
+      try {
+        await lottery.endALottery({from: user1});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
   
-//         await testCoin1._mint(user1, 20000000000000, { from: user1 });
-//         await testCoin1.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//         await lockerFactory.createLcoker( 0, testCoinAddress1, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+    });
 
+    it("can end the lottery once the expiry time reach", async () => {
+   
+      let lotteryInfo;
 
-//         let testCoin2 = await TestCoin.new();
-//         testCoinAddress2 = await testCoin2.address;
+      const lotteryID = await startALotteryWith5Participants();
+
+      lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      assert.equal(Number(lotteryInfo.staus), 0 );
+
+      await time.increase(time.duration.days(1));
+
+      await lottery.endALottery({from: user1});
+
+      lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      assert.equal(Number(lotteryInfo.staus), 1 );
   
-//         await testCoin2._mint(user1, 20000000000000, { from: user1 });
-//         await testCoin2.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//         await lockerFactory.createLcoker( 0, testCoinAddress2, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+    });
 
-//         let testCoin3 = await TestCoin.new();
-//         testCoinAddress3 = await testCoin3.address;
+    it("After ending the lottery, get his 4% share as expected", async () => {
+      
+      let ownerBalance;
+      let lotteryInfo;
+
+      const lotteryID = await startALotteryWith5Participants();
+
+      await time.increase(time.duration.days(1));
+
+      ownerBalance = await testCoin.balanceOf(user1);
+
+      
+      assert.equal(Number(ownerBalance), 10000 );
+      
+      await lottery.endALottery({from: user1});
+      
+      lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      // console.log(String(lotteryInfo.staus))
+      // console.log(String(lotteryInfo.countOfParticipants))
+      // console.log(String(lotteryInfo.countOfTickets))
+      // console.log(String(lotteryInfo.accumulatedFunds))
+      // console.log(String(lotteryInfo.winner))
+      // console.log(String(lotteryInfo.prize))
+      // console.log(String(lotteryInfo.ownerCommision));
+
+      ownerBalance = await testCoin.balanceOf(user1);
+      assert.equal(Number(ownerBalance), 10000 + Number(lotteryInfo.accumulatedFunds)*4/100 );
+      // console.log("Owner balance after ending lottery", Number(ownerBalance))
+
   
-//         await testCoin3._mint(user1, 20000000000000, { from: user1 });
-//         await testCoin3.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//         await lockerFactory.createLcoker( 0, testCoinAddress3, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+    });
+
+  })
+
+  describe("Participant =>", () => {
+
+    it("cannot buy tickets without paying anything", async () => {
+      let lotteryID = await startALottery();
+
+    // await testCoin._mint(user3, 1000);
+    // await testCoin.approve(lotteryAddress, 1000, { from: user3 });
 
 
-//         const locksListbyUser =  await lockerFactory.getLockersListbyUser(user1);
-//         assert.equal(String(locksListbyUser), "1,2,3");
-    
-//         const locksListbyToken1 =  await lockerFactory.getLockersListbyToken(testCoinAddress1, {from: user1});
-//         const locksListbyToken2 =  await lockerFactory.getLockersListbyToken(testCoinAddress2, {from: user1});
-//         const locksListbyToken3 =  await lockerFactory.getLockersListbyToken(testCoinAddress3, {from: user1});
-//         assert.equal(Number(locksListbyToken1), 1 );
-//         assert.equal(Number(locksListbyToken2), 2 );
-//         assert.equal(Number(locksListbyToken3), 3 );
-     
-//         const lock1details1 =  await lockerFactory.loker(1);
-//         assert.equal(String(lock1details1.owner), user1);
-//         assert.equal(String(lock1details1.tokenAddress), testCoinAddress1);
+      let err = false;
+
+      try {
+        await lottery.buyATicket(lotteryID, 10, {from: user3});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
+
+
+    })
+
+    it("cannot buy tickets without paying in enough tokens", async () => {
+
+      let lotteryID = await startALottery();
+
+      await testCoin._mint(user3, 999);
+      await testCoin.approve(lotteryAddress, 999, { from: user3 });
+
+
+      let err = false;
+
+      try {
+        await lottery.buyATicket(lotteryID, 10, {from: user3});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
+
+    })
+
+    it("cannot buy tickets more than maxTicketsPerTransaction", async () => {
+
+      let lotteryID = await startALottery();
+
+      await testCoin._mint(user3, 1100);
+      await testCoin.approve(lotteryAddress, 1100, { from: user3 });
+
+
+      let err = false;
+
+      try {
+        await lottery.buyATicket(lotteryID, 11, {from: user3});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
+
+    })
+
+    it("can buy tickets less or equal to maxTicketsPerTransaction", async () => {
+
+      let lotteryID = await startALottery();
+
+      await testCoin._mint(user3, 1500);
+      await testCoin.approve(lotteryAddress, 1500, { from: user3 });
+
+      await lottery.buyATicket(lotteryID, 5, {from: user3});
+      await lottery.buyATicket(lotteryID, 10, {from: user3});
+
+      const userContribution = await lottery.userContributions(lotteryID, user3);
+      assert.equal(Number(userContribution.tickets), 15);
+      assert.equal(Number(userContribution.contribution), 1500);
+
+    })
+
+    it("cannot buy tickets if the lottery is expired", async () => {
+
+      lotteryID = await startALotteryWith5Participants();
+
+      await time.increase(time.duration.days(1));
+      
+      let err = false;
+      
+      try {
+        await testCoin._mint(user3, 500);
+        await testCoin.approve(lotteryAddress, 500, { from: user3 });
+        await lottery.buyATicket(lotteryID, 5, {from: user3});
+      }
+      catch(e){
+        // console.log(e.reason)
+        err = true
+      }
+      assert.equal( err, true);
+
+    })
+
+  })
+
+  describe("Contract =>", () => {
+
+    it("will reflect the lottery info as expected", async () => {
+
+      let participantContribution;
+      let lotteryID = await startALotteryWith5Participants();
+
+      const lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      assert.equal(Number(lotteryInfo.staus), 0);
+      assert.equal(Number(lotteryInfo.countOfParticipants), 3);
+      assert.equal(Number(lotteryInfo.countOfTickets), 30)
+      assert.equal(Number(lotteryInfo.accumulatedFunds), 3000)
+
+      participantContribution = await lottery.userContributions(lotteryID, user2);
+      assert.equal(Number(participantContribution.tickets), 10);
+      assert.equal(Number(participantContribution.contribution), 1000);
+
+      participantContribution = await lottery.userContributions(lotteryID, user3);
+      assert.equal(Number(participantContribution.tickets), 10);
+      assert.equal(Number(participantContribution.contribution), 1000);
+
+      participantContribution = await lottery.userContributions(lotteryID, user4);
+      assert.equal(Number(participantContribution.tickets), 10);
+      assert.equal(Number(participantContribution.contribution), 1000);
+
+
+
+    });
+
+    it("will find the winner of the lottery as expected", async () => {
+
+      let participantContribution;
+      let lotteryID = await startALotteryWith5Participants();
+
+      await time.increase(time.duration.days(1));
+
+      await lottery.endALottery({from: user1});
+
+      const usersList = [user2, user3, user4]
+
+      const lotteryInfo = await lottery.lotteryInfo(lotteryID);
+      assert.equal(Number(lotteryInfo.staus), 1);
+      assert.notEqual(usersList.indexOf(lotteryInfo.winner), -1);
+
+    });
+
+    it("can show list of active lotteris and their owners", async () => {
+
+      const latestTime = Number((await time.latest()));
+      const OneDayDuration = Number(await time.duration.days(1));
   
-//         const lock1details2 =  await lockerFactory.loker(2);
-//         assert.equal(String(lock1details2.owner), user1);
-//         assert.equal(String(lock1details2.tokenAddress), testCoinAddress2);
-
-//         const lock1details3 =  await lockerFactory.loker(3);
-//         assert.equal(String(lock1details3.owner), user1);
-//         assert.equal(String(lock1details3.tokenAddress), testCoinAddress3);
-
-//     });
-
-//     it("anyone can query locker IDs by user address", async () => {
+      await lottery.updateCriteriaToken(testCoinAddress);
   
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       let testCoin1 = await TestCoin.new();
-//       testCoinAddress1 = await testCoin1.address;
-
-//       await testCoin1._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin1.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress1, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-
-//       let testCoin2 = await TestCoin.new();
-//       testCoinAddress2 = await testCoin2.address;
-
-//       await testCoin2._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin2.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress2, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-//       let testCoin3 = await TestCoin.new();
-//       testCoinAddress3 = await testCoin3.address;
-
-//       await testCoin3._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin3.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress3, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-
-
-//       const locksListbyUser =  await lockerFactory.getLockersListbyUser(user1);
-//       assert.equal(String(locksListbyUser), "1,2,3");
-
-//     });
-
-//     it("anyone can query locker IDs by token address", async () => {
+      await testCoin._mint(user1, 10_000, { from: user1 });
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+      // const lotteryID1 = await lottery.lotteriesCount();
   
-//       const latestTime = Number((await time.latest()));
-//       const OneYearsduration = Number(await time.duration.years(1));
+      await testCoin._mint(user2, 10_000, { from: user2 });
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user2});
+      // const lotteryID2 = await lottery.lotteriesCount();
 
-//       let testCoin1 = await TestCoin.new();
-//       testCoinAddress1 = await testCoin1.address;
+      await testCoin._mint(user3, 10_000, { from: user3 });
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user3});
+      // const lotteryID3 = await lottery.lotteriesCount();
 
-//       await testCoin1._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin1.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress1, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+      const activeIDs = await lottery.listOfActiveLotteriesID();
+      const activeUsers = await lottery.listOfActiveUsers();
 
+      // console.log(String(activeIDs))
+      // console.log(`1,2,3`)
+      // console.log(String(activeUsers))
+      // console.log(`${user1},${user2},${user3}`)
 
-//       let testCoin2 = await TestCoin.new();
-//       testCoinAddress2 = await testCoin2.address;
+      assert.equal(String(activeIDs), `1,2,3`)
+      assert.equal(String(activeUsers), `${user1},${user2},${user3}`)
 
-//       await testCoin2._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin2.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress2, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+    });
 
-//       let testCoin3 = await TestCoin.new();
-//       testCoinAddress3 = await testCoin3.address;
+    it("can show id list of all lotteries that a user has ever run and active lottery ", async () => {
 
-//       await testCoin3._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin3.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress3, 20000000000000, latestTime + OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
+      let latestTime = Number((await time.latest()));
+      const OneDayDuration = Number(await time.duration.days(1));
   
-//       const locksListbyToken1 =  await lockerFactory.getLockersListbyToken(testCoinAddress1, {from: user1});
-//       const locksListbyToken2 =  await lockerFactory.getLockersListbyToken(testCoinAddress2, {from: user1});
-//       const locksListbyToken3 =  await lockerFactory.getLockersListbyToken(testCoinAddress3, {from: user1});
-//       assert.equal(Number(locksListbyToken1), 1 );
-//       assert.equal(Number(locksListbyToken2), 2 );
-//       assert.equal(Number(locksListbyToken3), 3 );
-    
-//       const lock1details1 =  await lockerFactory.loker(1);
-//       assert.equal(String(lock1details1.owner), user1);
-//       assert.equal(String(lock1details1.tokenAddress), testCoinAddress1);
+      await lottery.updateCriteriaToken(testCoinAddress);
+  
+      await testCoin._mint(user1, 10_000, { from: user1 });
 
-//       const lock1details2 =  await lockerFactory.loker(2);
-//       assert.equal(String(lock1details2.owner), user1);
-//       assert.equal(String(lock1details2.tokenAddress), testCoinAddress2);
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+      await time.increase(time.duration.days(1));
+      await lottery.endALottery({from: user1});
 
-//       const lock1details3 =  await lockerFactory.loker(3);
-//       assert.equal(String(lock1details3.owner), user1);
-//       assert.equal(String(lock1details3.tokenAddress), testCoinAddress3);
+      latestTime = Number((await time.latest()));
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
+      await time.increase(time.duration.days(1));
+      await lottery.endALottery({from: user1});
 
-//     });
-
-//     it("User can withdraw their tokens partially in many turns once the locking time is over ", async () => {
-
-//       let userBalance;
-//       let lockerBalance;
-//       let latestTime;
-//       let locker1Info;
-
-//       latestTime = Number((await time.latest()));
-
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       await testCoin._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress, 20000000000000, latestTime + 2*OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-    
-//       locker1Info =  await lockerFactory.loker(1);
-//       assert.equal(String(locker1Info.owner), user1);
-//       assert.equal(String(locker1Info.tokenAddress), testCoinAddress);
-//       assert.equal(String(locker1Info.unlockTime), latestTime + 2*OneYearsduration);
-//       assert.equal(Number(locker1Info.numOfTokens), 20000000000000);
-
-//       userBalance = await testCoin.balanceOf(user1);
-//       lockerBalance = await testCoin.balanceOf(locker1Info.lockerAddress);
-      
-//       assert.equal(Number(userBalance), 0);
-//       assert.equal(Number(lockerBalance), 20000000000000);
-
-//       let err = false;
-
-//       try {
-//         await lockerFactory.uncreateLcoker( 0, 1, 10000000000000, {from: user1});
-//       }
-//       catch(e){
-//         // console.log(e.reason)
-//         err = true
-//       }
-//       assert.equal( err, true);
-
-      
-//       await time.increase(time.duration.years(1));
-//       latestTime = Number((await time.latest()));
-
-//       err = false;
-//       try {
-//         await lockerFactory.uncreateLcoker( 0, 1, 10000000000000, {from: user1});
-//       }
-//       catch(e){
-//         // console.log(e.reason)
-//         err = true
-//       }
-//       assert.equal( err, true);
-      
-//       await time.increase(time.duration.years(1));
-//       latestTime = Number((await time.latest()));
-//       // console.log("latestTime after 2 year", latestTime);
-
-//       await lockerFactory.unlockTokens(1, 10000000000000, {from: user1});
-
-//       locker1Info =  await lockerFactory.loker(1);
-//       assert.equal(Number(locker1Info.numOfTokens), 10000000000000);
-
-//       userBalance = await testCoin.balanceOf(user1);
-//       lockerBalance = await testCoin.balanceOf(locker1Info.lockerAddress);
-      
-//       assert.equal(Number(userBalance), 10000000000000);
-//       assert.equal(Number(lockerBalance), 10000000000000);
-
-//       err = false;
-//       try {
-//         await lockerFactory.unlockTokens(1, 10000000000001, {from: user1});
-//       }
-//       catch(e){
-//         // console.log(e.reason)
-//         err = true
-//       }
-//       assert.equal( err, true);
-
-//       await lockerFactory.unlockTokens( 1, 10000000000000, {from: user1});
-
-//       locker1Info =  await lockerFactory.loker(1);
-//       assert.equal(Number(locker1Info.numOfTokens), 0);
-
-//       userBalance = await testCoin.balanceOf(user1);
-//       lockerBalance = await testCoin.balanceOf(locker1Info.lockerAddress);
-      
-//       assert.equal(Number(userBalance), 20000000000000);
-//       assert.equal(Number(lockerBalance), 0);
+      latestTime = Number((await time.latest()));
+      await lottery.startALottery(100, latestTime + OneDayDuration, {from: user1});
 
 
-//       err = false;
-//       try {
-//         await lockerFactory.unlockTokens( 1, 100, {from: user1});
-//       }
-//       catch(e){
-//         // console.log(e.reason)
-//         err = true
-//       }
-//       assert.equal( err, true);
+      const myActiveLotteryID = await lottery.myActiveLotteryID({from: user1});
+      const myLotteriesIDList = await lottery.myLotteriesIDList({from: user1});
 
-//     });
+      // console.log(String(myActiveLotteryID))
+      // console.log(`1,2,3`)
+      // console.log(String(myLotteriesIDList))
+      // console.log(`${user1},${user2},${user3}`)
 
-//     it("User can withdraw their tokens at once the locking time is over ", async () => {
+      assert.equal(Number(myActiveLotteryID), 3)
+      assert.equal(String(myLotteriesIDList), `1,2,3`)
 
-//       let userBalance;
-//       let lockerBalance;
-//       let latestTime;
-//       let lockerInfo;
+    });
 
-//       latestTime = Number((await time.latest()));
-//       // console.log("latestTime at start ", latestTime)
+  });
 
-//       const OneYearsduration = Number(await time.duration.years(1));
-
-//       await testCoin._mint(user1, 20000000000000, { from: user1 });
-//       await testCoin.approve(lockerFactoryAddress, 20000000000000, { from: user1 });
-//       await lockerFactory.createLcoker( 0, testCoinAddress, 20000000000000, latestTime + 2*OneYearsduration, {from: user1, value: web3.utils.toWei('0.1', 'ether')});
-    
-//       lockerInfo =  await lockerFactory.loker(1);
-//       assert.equal(String(lockerInfo.owner), user1);
-//       assert.equal(String(lockerInfo.tokenAddress), testCoinAddress);
-//       assert.equal(String(lockerInfo.unlockTime), latestTime + 2*OneYearsduration);
-//       assert.equal(Number(lockerInfo.numOfTokens), 20000000000000);
-
-//       userBalance = await testCoin.balanceOf(user1);
-//       lockerBalance = await testCoin.balanceOf(lockerInfo.lockerAddress);
-      
-//       assert.equal(Number(userBalance), 0);
-//       assert.equal(Number(lockerBalance), 20000000000000);
-      
-//       await time.increase(time.duration.years(2));
-//       latestTime = Number((await time.latest()));
-//       // console.log("latestTime after 2 years", latestTime)
-
-//       await lockerFactory.unlockTokens( 1, 20000000000000, {from: user1});
-      
-
-//       lockerInfo =  await lockerFactory.loker(1);
-//       assert.equal(Number(lockerInfo.numOfTokens), 0);
-
-//       userBalance = await testCoin.balanceOf(user1);
-//       lockerBalance = await testCoin.balanceOf(lockerInfo.lockerAddress);
-      
-//       assert.equal(Number(userBalance), 20000000000000);
-//       assert.equal(Number(lockerBalance), 0);
-
-
-//     });
-
-            
-//   });
 
 
 

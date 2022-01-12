@@ -1,23 +1,56 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { makeStyles } from '@mui/styles';
 import { LotteryTable } from './LotteryTable';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ToggleButtons from '../ToggleButton';
+import { ethers } from "ethers";
+import { useDispatch, useSelector } from 'react-redux';
+import { LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
 
+const LotteryABI = require("../../abis/Lottery.json") 
+const ERC20ABI = require("../../abis/TestCoin.json") 
 
 const UpcomingLotteries = () => {
-
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
+    const dispatch = useDispatch();
+    const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
 
-    const [alignment, setAlignment] = React.useState('active');
+    console.log(lotteryData);
 
-    const handleChange = (
-      event: React.MouseEvent<HTMLElement>,
-      newAlignment: string,
-    ) => {
-      setAlignment(newAlignment);
-    };
-  
+
+    useEffect(() => {
+
+        const fetchData = async () => {       
+                
+                const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
+                console.log(lotteryContract)
+
+                const counts = await lotteryContract.lotteriesCount();
+                // console.log("Lotteries Count", Number(counts))
+        
+                const activeLotteries = await lotteryContract.listOfActiveLotteriesID();
+                
+                let activeLotteriesList: any = [];
+                
+                activeLotteries.map( async (id: any) => {
+                    activeLotteriesList.push(Number(id));
+                    
+                    let lotteryInformation = await lotteryContract.getLotteryInfo(id);
+                    let newInfo = {...lotteryInformation, count: 1};
+
+                    // console.log("lotteryInformation", lotteryInformation)
+                    dispatch(addActiveLotteries(newInfo))
+                })
+                
+        
+        }
+        
+        fetchData();
+
+    }, [])
+
+
+ 
     return (
         <div className={classes.UpcomingLotteriesContainer}>
 
@@ -28,17 +61,7 @@ const UpcomingLotteries = () => {
                 </div>
 
                 <div className={classes.toggleButtonsContainer}>
-
-                <ToggleButtonGroup
-                    // sx={{border: "1px solid black"}}
-                    color="primary"
-                    value={alignment}
-                    exclusive
-                    onChange={handleChange}
-                    >
-                    <ToggleButton sx={{height: "30px", color: "white", fontSize: "12px", fontWeight: "500"}} value="active">Active</ToggleButton>
-                    <ToggleButton sx={{height: "30px", color: "white", fontSize: "12px", fontWeight: "500"}} value="all">ALL</ToggleButton>
-                </ToggleButtonGroup>
+                    <ToggleButtons text1='Active' text2='All' />
                 </div>
 
 
@@ -93,8 +116,9 @@ const useStyles = makeStyles({
         
     },
     toggleButtonsContainer: {
-        border: "1px solid #525252",  
-        borderRadius: "5px"
+        border: "1px solid #5f5656",  
+        borderRadius: "0px",
+        height: "30px",
         // color: 'white',
         // fontSize: "16px",
         // fontWeight: "600",

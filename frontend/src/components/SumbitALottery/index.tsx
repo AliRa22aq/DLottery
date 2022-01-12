@@ -1,23 +1,93 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { makeStyles } from '@mui/styles';
+import { useDispatch, useSelector } from 'react-redux';
+import { ethers } from "ethers";
+import Tooltip from '@mui/material/Tooltip';
+// import Web3 from "web3"
+import { setActiveUserInfo, setNetworkDetails, setContractMethods, DataType } from '../Store';
+
+const lotteryABI = require("../../abis/Lottery.json")
+
 
 
 const SumbitALottery = () => {
 
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    provider.on("network", (newNetwork, oldNetwork) => {
+        if (oldNetwork) {
+            window.location.reload();
+        }
+    });
+
+
+    // const web3 = new Web3(window.ethereum);
+
     const classes = useStyles();
+    const dispatch = useDispatch();
+    const {userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
+    const {lotteryMethods, lotteryAddress} = masterContract;
+
+    const [price, setPrice] = useState<number>(0);
+    // const date  = (new Date).getTime(); 
+    // console.log(date);
+
+    const [date, setDate] = useState<number>((new Date).getTime());
+
+    const handlePriceChange = (e: any) => {
+        // console.log(e)
+        setPrice(e)
+    }
+    
+    const handleDateChange = (e: any) => {
+        // console.log( (new Date(e)).getTime())
+        setDate(e)
+    }
+
+    const launchLottery = async () => {
+
+        if(!price && !date) {return;}
+
+        const expiryData = ((new Date(date)).getTime()/1000).toFixed()    ;  
+
+        console.log(price)
+        console.log(expiryData)
+        console.log(lotteryMethods);
+
+        const signer = provider.getSigner()
+        const launchWithSigner = lotteryMethods.connect(signer);
+
+        try {
+            let tx = await launchWithSigner.startALottery(price, expiryData);
+            let receipt = await tx.wait();
+            console.log(receipt);
+
+        }
+        catch(e: any){
+            alert(e.data.message)
+        }
+
+    }
     
     return (
         <div className={classes.submitContainer}>
             
             <div className={classes.submitElement1}>
-                <input type="number" placeholder='Price' className={classes.inputContainer}/>
-                <input type="date" placeholder='Deadline' className={classes.inputContainer}/>
-                <button className={classes.buttonContainer}>  Launch </button>
+                <input type="number" value={price} onChange={(e)=> handlePriceChange(e.target.value)} placeholder='Price' className={classes.inputContainer}/>
+                <input type="datetime-local" value={date} onChange={(e)=> handleDateChange(e.target.value)} placeholder='Deadline' className={classes.inputContainer}/>
+
+                <Tooltip title="You need to hold atleasr 10,000 Tokens to start a lottery">
+                    <button onClick={launchLottery}  className={classes.buttonContainer}>  Launch </button>
+                </Tooltip>
+
             </div>
             
-            <div className={classes.submitElement2}>
-                Your balance: 2500000 OURs
-            </div>
+            {
+                masterContract.erc20Symbol && (
+                    <div className={classes.submitElement2}>
+                        Your balance: {userInfo.userBalance} {masterContract.erc20Symbol}
+                    </div>
+                )
+            }
 
         </div>
     )

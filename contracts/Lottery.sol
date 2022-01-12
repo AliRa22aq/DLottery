@@ -85,9 +85,6 @@ interface LinkTokenInterface {
 
 
 pragma solidity ^0.8.0;
-
-
-
 /** ****************************************************************************
  * @notice Interface for contracts using VRF randomness
  * *****************************************************************************
@@ -278,9 +275,6 @@ abstract contract VRFConsumerBase is VRFRequestIDBase {
 }
 
 // File: Lottery/SafeMath.sol
-
-
-
 pragma solidity ^0.8.0;
 
 // CAUTION
@@ -803,10 +797,7 @@ library EnumerableSet {
 
 // File: Lottery/Context.sol
 
-
-
 pragma solidity ^0.8.0;
-
 /**
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -830,10 +821,7 @@ abstract contract Context {
 // File: Lottery/Ownable.sol
 
 
-
 pragma solidity ^0.8.0;
-
-
 /**
  * @dev Contract module which provides a basic access control mechanism, where
  * there is an account (an owner) that can be granted exclusive access to
@@ -941,7 +929,6 @@ contract Lottery is Ownable, VRFConsumerBase {
         keyHash = 0xcaf3c3727e033261d383b315559476f48034c13b18f8cafed4d871abe5049186;
         fee = 0.1 * 10 ** 18; // 0.1 LINK 
     }
-
 
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -1125,6 +1112,10 @@ contract Lottery is Ownable, VRFConsumerBase {
 
     function myActiveLotteryID() public view returns (uint){
         return userActiveLotteryID[_msgSender()];
+    }
+
+    function getLotteryInfo(uint _id) public view returns (LotteryInfo memory) {
+        return lotteryInfo[_id];
     }
 
     // function myLotteriesIDList() public view returns (uint[] memory){

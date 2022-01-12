@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,75 +7,128 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import Button from '@mui/material/Button';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { decreaseCount ,increaseCount, LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { useDispatch, useSelector } from 'react-redux';
+// import moment from 'moment';
+import Countdown from "react-countdown";
+import CircularProgress from '@mui/material/CircularProgress';
 
 interface Column {
-  id: 'id' | 'price' | 'time' | 'status'  |'button';
+  id: 'id' | 'price' | 'time' | 'contributions' | 'button';
   label: string;
-  minWidth?: number;
+  minWidth: number;
   align?: 'right' | "center";
   format?: (value: number) => string;
 }
 
-const columns: readonly Column[] = [
-  { id: 'id', label: 'ID', minWidth: 80, align: 'center' },
-  { id: 'price', label: "Price", minWidth: 80, align: 'center' },
-  { id: 'status', label: "Status", minWidth: 80, align: 'center' },
+let columns: readonly Column[] = [
+  { id: 'id', label: 'ID', minWidth: 50, align: 'center' },
+  { id: 'price', label: "Price", minWidth: 50, align: 'center' },
+  { id: 'contributions', label: "Participants/Tickets", minWidth: 100, align: 'center' },
   {
     id: 'time',
     label: 'Time Left',
-    minWidth: 80,
+    minWidth: 100,
     align: 'center',
     format: (value: number) => value.toLocaleString('en-US'),
   },
   {
     id: 'button',
     label: '',
-    minWidth: 80,
+    minWidth: 100,
     align: 'center',
-    format: (value: number) => value.toLocaleString('en-US'),
+    format: (value: number) => value.toLocaleString('en-US')
   },
 
 ];
 
-interface Data {
-  id: string;
-  price: string;
-  status: string;
-  time: number;
-}
+// interface Data {
+//   id: number;
+//   price: number;
+//   status: "In Progress" |"Expired"|"Pending";
+//   time: number;
+//   count: number;
+// }
 
-function createData(
-  id: string,
-  price: string,
-  status: string,
-  time: number,
-): Data {
-  return { id, price, status, time };
-}
+// let data = [
+//   {
+//     id: 1,
+//     price: "100",
+//     status: "In Progress",
+//     time: 123456789,
+//     count: 1
+//   },
+//   {
+//     id: 2,
+//     price: "100",
+//     status: "In Progress",
+//     time: 123456789,
+//     count: 1
+//   },
+//   {
+//     id: 3,
+//     price: "100",
+//     status: "Pending",
+//     time: 123456789,
+//     count: 1
+//   },
+//   {
+//     id: 4,
+//     price: "100",
+//     status: "Expired",
+//     time: 123456789,
+//     count: 1
+//   },
+//   {
+//     id: 5,
+//     price: "100",
+//     status: "In Progress",
+//     time: 123456789,
+//     count: 1
+//   },
+//   {
+//     id: 6,
+//     price: "100",
+//     status: "Expired",
+//     time: 123456789,
+//     count: 1
+//   },
+//   {
+//     id: 7,
+//     price: "100",
+//     status: "In Progress",
+//     time: 123456789,
+//     count: 1
+//   },
 
-const rows = [
-  createData('1', '200 OURS', "In Progress", 124),
-  createData('2', '200 OURS', "In Progress", 124),
-  createData('3', '200 OURS', "In Progress", 124),
-  createData('4', '200 OURS', "In Progress", 124),
-  createData('5', '200 OURS', "In Progress", 124),
-  createData('21', '200 OURS', "In Progress", 124),
-  createData('22', '200 OURS', "In Progress", 124),
-  createData('32', '200 OURS', "In Progress", 124),
-  createData('42', '200 OURS', "In Progress", 124),
-  createData('52', '200 OURS', "In Progress", 124),
-  createData('13', '200 OURS', "In Progress", 124),
-  createData('24', '200 OURS', "In Progress", 124),
-  createData('34', '200 OURS', "In Progress", 124),
-  createData('44', '200 OURS', "In Progress", 124),
-  createData('54', '200 OURS', "In Progress", 124),
+// ];
 
-
-];
 
 export const LotteryTable = () => {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const dispatch = useDispatch();
+
+  const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
+
+  console.log("lotteryData", lotteryData);
+
+  // const [rows, setRows] = useState(data);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const increaseCountFn = (id: number) => {
+    console.log("increaseCount", id)
+    dispatch(increaseCount(id))
+    // dispatch(addActiveLotteries(newInfo))
+
+  }
+
+  const decreaseCountFn = (id: number) => {
+    dispatch(decreaseCount(id))
+  }
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -86,9 +139,30 @@ export const LotteryTable = () => {
     setPage(0);
   };
 
+  const renderer = ({ days, hours, minutes, seconds, completed }: any) => {
+      if (completed) {
+          // Render a completed state
+          return <div style={{ fontSize: "12px", fontWeight: 500 }}> Expired </div>;
+      } else {
+          // Render a countdown
+          return (
+                <div style={{ fontSize: "12px", fontWeight: 500 }}> {days}:{hours}:{minutes}:{seconds} </div>
+          )
+      }
+  };
+
+  
+  
+  if(!lotteryData.activeLottries){
+    return (
+      <div style={{border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}> <CircularProgress size={50} sx={{color: "#fff"}} /> </div>
+    )
+  }
+  
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 350 }}>
+
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -103,38 +177,58 @@ export const LotteryTable = () => {
               ))}
             </TableRow>
           </TableHead>
-          {/* <TableBody>
-            {rows
+
+          <TableBody sx={{ border: "1px solid black" }}>
+
+            {
+              lotteryData?.activeLottries && lotteryData?.activeLottries
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                    {columns.map((column) => {
-                      // const value = columns[row.id]
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          {row.id}
-                        </TableCell>
-                      );
-                    })}
+              .map((lottery: LotteryData) => (
+                <TableRow
+                  key={Number(lottery.id)}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell align="center">{Number(lottery.id)}</TableCell>
+                  <TableCell align="center">{Number(lottery.priceOfTicket)}</TableCell>
+                  <TableCell align="center">{ `${Number(lottery.countOfParticipants)}/${Number(lottery.countOfTickets)}`}</TableCell>
+                  <TableCell align="center"> <Countdown date={Number(lottery.endingtime)*1000} renderer={renderer} /> </TableCell>
+                  
+                  <TableCell align="center" >
+
+                    {
+                      lottery.staus === 0 && (
+                        <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
+                          
+                          <span onClick={() => decreaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginRight: "2px" }}> - </span>
+                          
+                          <Button variant='contained'
+                          sx={{ 
+                              bgcolor: "#ff6565", 
+                              fontSize: "8px", 
+                              width: "30px", 
+                              borderRadius: 0 ,
+                              '&:hover': { 
+                                bgcolor: "#737473",
+                                color: "#fff",
+                                borderColor: "transparent",
+                                }
+                
+                            }}>
+                               Buy {lottery.count}
+                          </Button>
+                          
+                          <span onClick={() => increaseCountFn(Number(lottery.id)) } style={{ cursor: "pointer", fontSize: "16px", marginLeft: "2px" }}> + </span>
+                        
+                        </div>
+                      )
+                    }
+
+                    </TableCell>
                   </TableRow>
-                );
-              })}
-          </TableBody> */}
-              <TableBody sx={{border: "1px solid black"}}>
-                {rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell align="center">{row.id}</TableCell>
-                    <TableCell align="center">{row.price}</TableCell>
-                    <TableCell align="center">{row.status}</TableCell>
-                    <TableCell align="center">{row.time}</TableCell>
-                    <TableCell align="center"> <button> XXX </button></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+                ))
+              }
+
+          </TableBody>
 
 
         </Table>
@@ -142,7 +236,7 @@ export const LotteryTable = () => {
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={rows.length}
+        count={lotteryData.activeLottries.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

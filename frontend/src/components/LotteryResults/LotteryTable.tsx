@@ -144,7 +144,7 @@ export const LotteryTable = () => {
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                       <TableCell align="center">{Number(lottery.id)}</TableCell>
-                      <TableCell align="center">{Number(lottery.prize)}</TableCell>
+                      <TableCell align="center">{Number(lottery.prize)} {masterContract.erc20Symbol} </TableCell>
                       <TableCell align="center">{lottery.winner}</TableCell>
                     </TableRow>
                   )

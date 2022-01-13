@@ -2,20 +2,21 @@ import React, { useEffect } from 'react'
 import { makeStyles } from '@mui/styles';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { DataType, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { DataType, setActiveUser, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
 import { ethers } from "ethers";
 
 import { getChainName , shortenIfAddress } from "@usedapp/core";
 
-import Web3Modal from "web3modal";
+// import Web3Modal from "web3modal";
 // import WalletConnectProvider from "@walletconnect/web3-provider";
-import detectEthereumProvider from '@metamask/detect-provider';
+// import detectEthereumProvider from '@metamask/detect-provider';
 
 // const Web3 = require('web3');
 // var Web3 = require('web3');
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-
+import MenuIcon from '@mui/icons-material/Menu';
+import Divider from '@mui/material/Divider';
 
 const LotteryABI = require("../../abis/Lottery.json") 
 const ERC20ABI = require("../../abis/TestCoin.json") 
@@ -24,6 +25,12 @@ const ERC20ABI = require("../../abis/TestCoin.json")
 
 const Header = () => {
       
+    window.ethereum.on('accountsChanged', function (accounts: any) {
+        console.log("accounts", accounts)
+        dispatch(setActiveUser(accounts[0]))
+      })
+
+      
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
     const dispatch = useDispatch();
@@ -31,7 +38,7 @@ const Header = () => {
 
     useEffect(()=> {
         ConnectWallet();
-    }, [])
+    }, [userInfo.userAddress])
 
     const ConnectWallet = async () => {
 
@@ -86,14 +93,14 @@ const Header = () => {
 
     return (
         <div className={classes.headerContainer}>
-            <div className={classes.headerElement1}
-                    aria-controls={open ? 'basic-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={(e) => handleClick(e)}
-            >
 
-                Menu
+            <div className={classes.headerElement1}
+                aria-controls={open ? 'basic-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={(e) => handleClick(e)}                
+            >
+                    <MenuIcon />
 
             </div>
                 <Menu
@@ -103,9 +110,18 @@ const Header = () => {
                     onClose={handleClose}
                     MenuListProps={{ 'aria-labelledby': 'basic-button' }}
                 >
+                    <MenuItem onClick={handleClose}>ANONYMOUS</MenuItem>
+                    <MenuItem onClick={handleClose}>JACKPOT</MenuItem>
+                    <MenuItem onClick={handleClose}>LIFETIME </MenuItem>
+                    <Divider />
                     <MenuItem onClick={handleClose}>Whitepaper</MenuItem>
                     <MenuItem onClick={handleClose}>Social Links</MenuItem>
                     <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
+                    <Divider />
+                    <MenuItem onClick={handleClose}>LINK balance: {masterContract.linkBalance}</MenuItem>
+
+
+
                 </Menu>
             <div className={classes.headerElement2}>
                 LOGO
@@ -155,7 +171,9 @@ const useStyles = makeStyles({
         // justifyContent: "center",
         alignItems: "center",
         width: "200px",
+        // cursor: "pointer"
         cursor: "pointer"
+
 
     },
     headerElement2: {

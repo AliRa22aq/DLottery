@@ -947,11 +947,11 @@ contract Lottery is Ownable, VRFConsumerBase {
     // mapping(address => uint[]) userLotteriesIDList;
     mapping(bytes32 => address) lotteryRandomenessID;
 
-    mapping(uint => LotteryInfo) lotteryInfo;
+    mapping(uint => LotteryInfo) public lotteryInfo;
     mapping(uint => mapping(address =>  UserContributions)) public userContributions;
 
 
-    enum Status {STARTED, ENDED}
+    enum Status {STARTED, PROCESSING, ENDED}
     
     struct UserContributions {
         uint tickets;
@@ -995,8 +995,8 @@ contract Lottery is Ownable, VRFConsumerBase {
         return EnumerableSet.add(activeUsers, _msgSender());
     }
 
-    function removeActiveUser() internal returns (bool) {
-        return EnumerableSet.remove(activeUsers, _msgSender());
+    function removeActiveUser(address _user) internal returns (bool) {
+        return EnumerableSet.remove(activeUsers, _user);
     }
 
     function listOfActiveUsers() public view returns (address[] memory) {
@@ -1007,7 +1007,7 @@ contract Lottery is Ownable, VRFConsumerBase {
         return EnumerableSet.add(activeLotteries, _id);
     }
 
-    function removeLottery(uint _id) internal returns (bool) {
+    function removeActiveLottery(uint _id) internal returns (bool) {
         return EnumerableSet.remove(activeLotteries, _id);
     }
 
@@ -1015,9 +1015,9 @@ contract Lottery is Ownable, VRFConsumerBase {
     function startALottery(uint _priceOfTicket, uint _endingtime) public userNotExists HoldRequiredTokens {
         
         require(
-            _endingtime >= block.timestamp + 6 hours &&
-            _endingtime <= block.timestamp + 120 days,          
-            "Ending time should be more than 6 hours and less then 120 days"
+            // _endingtime >= block.timestamp + 6 hours &&
+            _endingtime <= block.timestamp + 20 days,          
+            "Ending time should be more than 6 hours and less then 20 days"
             );
 
         lotteriesCount++;
@@ -1067,12 +1067,13 @@ contract Lottery is Ownable, VRFConsumerBase {
         if(lotteryInfo[_id].accumulatedFunds > 0){            
             require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
             bytes32 requestId = requestRandomness(keyHash, fee);
-            lotteryRandomenessID[requestId] = msg.sender;
+            lotteryInfo[_id].status = Status.PROCESSING;
+            lotteryRandomenessID[requestId] = _msgSender();
         }
         else {
             lotteryInfo[_id].status = Status.ENDED;
-            removeActiveUser();
-            removeLottery(userActiveLotteryID[_msgSender()]);
+            removeActiveUser(_msgSender());
+            removeActiveLottery(userActiveLotteryID[_msgSender()]);
             delete userActiveLotteryID[_msgSender()];     
         }
 
@@ -1083,7 +1084,9 @@ contract Lottery is Ownable, VRFConsumerBase {
 
         randomResult = randomness;
 
-        uint _id = userActiveLotteryID[lotteryRandomenessID[requestId]];
+        address activeUserAddress = lotteryRandomenessID[requestId];
+
+        uint _id = userActiveLotteryID[activeUserAddress];
         uint winnerIndex = randomness.mod(lotteryInfo[_id].partipants.length);
         lotteryInfo[_id].winnerIndex = winnerIndex;
 
@@ -1097,16 +1100,16 @@ contract Lottery is Ownable, VRFConsumerBase {
         bool withdrawPrize = IERC20(OURAddress).transfer(winnerAddr, prize);
         require(withdrawPrize, "withdrawPrize is unseccessfull");
 
-        bool sendOnerCommision = IERC20(OURAddress).transfer(_msgSender(), ownerCommision);
+        bool sendOnerCommision = IERC20(OURAddress).transfer(activeUserAddress, ownerCommision);
         require(sendOnerCommision, "sendOnerCommision is unseccessfull");
 
         lotteryInfo[_id].prize = prize;
         lotteryInfo[_id].ownerCommision = ownerCommision;
         lotteryInfo[_id].status = Status.ENDED;
 
-        removeActiveUser();
-        removeLottery(userActiveLotteryID[_msgSender()]);
-        delete userActiveLotteryID[_msgSender()];   
+        removeActiveUser(activeUserAddress);
+        removeActiveLottery(_id);
+        delete userActiveLotteryID[activeUserAddress];   
 
     }
 
@@ -1114,9 +1117,9 @@ contract Lottery is Ownable, VRFConsumerBase {
         return userActiveLotteryID[_msgSender()];
     }
 
-    function getLotteryInfo(uint _id) public view returns (LotteryInfo memory) {
-        return lotteryInfo[_id];
-    }
+    // function getLotteryInfo(uint _id) public view returns (LotteryInfo memory) {
+    //     return lotteryInfo[_id];
+    // }
 
     // function myLotteriesIDList() public view returns (uint[] memory){
     //     return userLotteriesIDList[_msgSender()];

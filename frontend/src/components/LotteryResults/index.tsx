@@ -16,7 +16,7 @@ const LotteryResults = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
     const dispatch = useDispatch();
-    const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
+    const {lotteryData, userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
 
 
     useEffect(() => {
@@ -28,17 +28,12 @@ const LotteryResults = () => {
 
                 const counts = await lotteryContract.lotteriesCount();
                 console.log("All Lotteries Count", Number(counts))
-        
-                // let allLotteriesList: any = [];
-                
+                        
                 for(let i = Number(counts); i > 0; i--){
-                    let lotteryInformation = await lotteryContract.getLotteryInfo(i);
+                    let lotteryInformation = await lotteryContract.lotteryInfo(i);
                     console.log("All LotteryResults", lotteryInformation)
                     dispatch(addAllLotteries(lotteryInformation))         
                 }
-                    
-
-                
         
         }
         

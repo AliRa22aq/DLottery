@@ -103,9 +103,9 @@ export const LotteryTable = () => {
       )
     }
     
-    console.log( "Contains ",  lotteryData?.allLotteries?.some((lottery) => Number(lottery.staus) === 1) )
+    console.log( "Contains ",  lotteryData?.allLotteries?.some((lottery) => Number(lottery.status) === 2) )
 
-    const drawExists = lotteryData?.allLotteries?.some((lottery) => Number(lottery.staus) === 1);
+    const drawExists = lotteryData?.allLotteries?.some((lottery) => Number(lottery.status) === 2);
 
     if(!drawExists){
       return(
@@ -138,7 +138,7 @@ export const LotteryTable = () => {
               .map((lottery) => (
                 <>
                 {
-                  Number(lottery.staus) === 1 && (
+                  lottery.status === 2 && (
                     <TableRow
                       key={Number(lottery.id)}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

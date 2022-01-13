@@ -13,7 +13,7 @@ const UpcomingLotteries = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
     const dispatch = useDispatch();
-    const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
+    const {lotteryData, userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
 
     useEffect(() => {
 
@@ -32,7 +32,7 @@ const UpcomingLotteries = () => {
                 activeLotteries.map( async (id: any) => {
                     activeLotteriesList.push(Number(id));
                     
-                    let lotteryInformation = await lotteryContract.getLotteryInfo(id);
+                    let lotteryInformation = await lotteryContract.lotteryInfo(id);
                     let newInfo = {...lotteryInformation, count: 1};
 
                     // console.log("lotteryInformation", lotteryInformation)

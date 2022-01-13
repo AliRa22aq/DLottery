@@ -8,8 +8,6 @@ import { setActiveUserInfo, setNetworkDetails, setContractMethods, DataType } fr
 
 const lotteryABI = require("../../abis/Lottery.json")
 
-
-
 const SumbitALottery = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);

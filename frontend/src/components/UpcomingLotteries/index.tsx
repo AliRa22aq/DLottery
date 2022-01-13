@@ -4,7 +4,7 @@ import { LotteryTable } from './LotteryTable';
 import ToggleButtons from '../ToggleButton';
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from 'react-redux';
-import { LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { readLinkBalance, LotteryData, DataType, addActiveLotteries } from '../Store';
 
 const LotteryABI = require("../../abis/Lottery.json") 
 const ERC20ABI = require("../../abis/TestCoin.json") 
@@ -14,9 +14,6 @@ const UpcomingLotteries = () => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
-
-    console.log(lotteryData);
-
 
     useEffect(() => {
 
@@ -41,6 +38,13 @@ const UpcomingLotteries = () => {
                     // console.log("lotteryInformation", lotteryInformation)
                     dispatch(addActiveLotteries(newInfo))
                 })
+
+                const linkBalance = await lotteryContract.linkBalance();
+                
+                console.log("linkBalance", Number(ethers.utils.formatEther(linkBalance)))
+
+                dispatch(readLinkBalance(Number(ethers.utils.formatEther(linkBalance))))
+          
                 
         
         }
@@ -60,9 +64,9 @@ const UpcomingLotteries = () => {
 
                 </div>
 
-                <div className={classes.toggleButtonsContainer}>
+                {/* <div className={classes.toggleButtonsContainer}>
                     <ToggleButtons text1='Active' text2='All' />
-                </div>
+                </div> */}
 
 
             </div>

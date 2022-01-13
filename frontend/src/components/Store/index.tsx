@@ -8,6 +8,7 @@ interface MasterContract {
   erc20Address: string,
   erc20Symbol: string,
   erc20Methods: any,
+  linkBalance: number | null
 }
 
 interface NetworkDetail {
@@ -66,6 +67,7 @@ const initialState: DataType = {
     erc20Address: "0x78D85b6CA607e628f2981198EDF0f28E7A571E5f",
     erc20Symbol: "",
     erc20Methods: null,
+    linkBalance: null,
   
   },
   lotteryData: {
@@ -98,7 +100,7 @@ const dataSlice = createSlice({
     },
     setContractMethods(state, { payload }: PayloadAction<{lotteryMethods: any, erc20Methods: any}>) {
       state.masterContract.lotteryMethods = payload.lotteryMethods
-      state.masterContract.erc20Methods = payload.lotteryMethods
+      state.masterContract.erc20Methods = payload.erc20Methods
     },
     addActiveLotteries(state, { payload }: PayloadAction<LotteryData>) {
       if(state.lotteryData.activeLottries === null){
@@ -107,6 +109,18 @@ const dataSlice = createSlice({
       else {
         state.lotteryData.activeLottries.push(payload)
       }
+    },
+    addAllLotteries(state, { payload }: PayloadAction<LotteryData>) {
+      if(state.lotteryData.allLotteries === null){
+        state.lotteryData.allLotteries = [payload]
+      }
+      else {
+        state.lotteryData.allLotteries.push(payload)
+      }
+    },
+    
+    readLinkBalance(state, {payload}: PayloadAction<number>){
+      state.masterContract.linkBalance = payload;
     },
 
     increaseCount(state, { payload }: PayloadAction<number>) {
@@ -146,6 +160,6 @@ const dataSlice = createSlice({
 // Extract the action creators object and the reducer
 const { actions, reducer } = dataSlice
 // Extract and export each action creator by name
-export const { decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
+export const { addAllLotteries, readLinkBalance, decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
 // Export the reducer, either as a default or named export
 export default reducer

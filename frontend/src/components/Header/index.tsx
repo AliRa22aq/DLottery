@@ -13,6 +13,8 @@ import detectEthereumProvider from '@metamask/detect-provider';
 
 // const Web3 = require('web3');
 // var Web3 = require('web3');
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 
 
 const LotteryABI = require("../../abis/Lottery.json") 
@@ -23,23 +25,13 @@ const ERC20ABI = require("../../abis/TestCoin.json")
 const Header = () => {
       
     const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const dispatch = useDispatch();
-    // let web3: any;
-    const {userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
-
-
-    // console.log(userAddress)
-    // console.log(networkDetail)
-    console.log(masterContract)
-
-
     const classes = useStyles();
-
+    const dispatch = useDispatch();
+    const {userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
 
     useEffect(()=> {
         ConnectWallet();
     }, [])
-
 
     const ConnectWallet = async () => {
 
@@ -56,8 +48,9 @@ const Header = () => {
         
         const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
         const erc20Contract = new ethers.Contract(masterContract.erc20Address , ERC20ABI.abi , provider)
-        console.log(lotteryContract)
-        console.log(erc20Contract) 
+        // console.log(lotteryContract)
+        console.log("erc20Contract", erc20Contract) 
+
         dispatch(setContractMethods({lotteryMethods: lotteryContract, erc20Methods: erc20Contract}))
         
         
@@ -74,6 +67,18 @@ const Header = () => {
         dispatch(setNetworkDetails({ id: Number(network.chainId), chain: getChainName(Number(network.chainId)) }));
             
     }
+
+
+
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: any) => {
+      setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
   
   
 
@@ -81,9 +86,27 @@ const Header = () => {
 
     return (
         <div className={classes.headerContainer}>
-            <div className={classes.headerElement1}>
+            <div className={classes.headerElement1}
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={(e) => handleClick(e)}
+            >
+
                 Menu
+
             </div>
+                <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{ 'aria-labelledby': 'basic-button' }}
+                >
+                    <MenuItem onClick={handleClose}>Whitepaper</MenuItem>
+                    <MenuItem onClick={handleClose}>Social Links</MenuItem>
+                    <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
+                </Menu>
             <div className={classes.headerElement2}>
                 LOGO
             </div>
@@ -131,7 +154,8 @@ const useStyles = makeStyles({
         display: "flex",
         // justifyContent: "center",
         alignItems: "center",
-        width: "200px"
+        width: "200px",
+        cursor: "pointer"
 
     },
     headerElement2: {

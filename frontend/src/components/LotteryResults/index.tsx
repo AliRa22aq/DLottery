@@ -1,14 +1,52 @@
 
 
-import React from 'react'
+import React, {useEffect} from 'react'
 import { makeStyles } from '@mui/styles';
 import { LotteryTable } from './LotteryTable';
 import ToggleButtons from '../ToggleButton';
+import { ethers } from "ethers";
+import { useDispatch, useSelector } from 'react-redux';
+import { addAllLotteries, readLinkBalance, LotteryData, DataType, addActiveLotteries } from '../Store';
+const LotteryABI = require("../../abis/Lottery.json") 
+const ERC20ABI = require("../../abis/TestCoin.json") 
 
 
 const LotteryResults = () => {
 
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
+    const dispatch = useDispatch();
+    const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
+
+
+    useEffect(() => {
+
+        const fetchData = async () => {       
+                
+                const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
+                console.log(lotteryContract)
+
+                const counts = await lotteryContract.lotteriesCount();
+                console.log("All Lotteries Count", Number(counts))
+        
+                // let allLotteriesList: any = [];
+                
+                for(let i = Number(counts); i > 0; i--){
+                    let lotteryInformation = await lotteryContract.getLotteryInfo(i);
+                    console.log("All LotteryResults", lotteryInformation)
+                    dispatch(addAllLotteries(lotteryInformation))         
+                }
+                    
+
+                
+        
+        }
+        
+        fetchData();
+
+    }, [])
+
+
  
     return (
         <div className={classes.UpcomingLotteriesContainer}>

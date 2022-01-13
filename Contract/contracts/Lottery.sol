@@ -1152,7 +1152,7 @@ contract Lottery is Ownable, VRFConsumerBase {
 
     }
 
-    function withdrawLink() external onlyOwner{
+    function withdrawLink() external onlyOwner {
         uint balance = LINK.balanceOf(address(this));
         require(balance > 0, "Nothing to withdraw");
 

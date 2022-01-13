@@ -11,9 +11,13 @@ import Button from '@mui/material/Button';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { shortenIfAddress } from "@usedapp/core";
+import { useDispatch, useSelector } from 'react-redux';
+import { decreaseCount ,increaseCount, LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 interface Column {
-  id: 'id' | 'prize' | 'winner' | 'status' | 'button';
+  id: 'id' | 'prize' | 'winner';
   label: string;
   minWidth: number;
   align?: 'right' | "center";
@@ -23,22 +27,7 @@ interface Column {
 let columns: readonly Column[] = [
   { id: 'id', label: 'ID', minWidth: 50, align: 'center' },
   { id: 'prize', label: "Prize", minWidth: 50, align: 'center' },
-  { id: 'winner', label: "Winner", minWidth: 50, align: 'center' },
-  {
-    id: 'status',
-    label: 'Status',
-    minWidth: 100,
-    align: 'center',
-    format: (value: number) => value.toLocaleString('en-US'),
-  },
-  {
-    id: 'button',
-    label: '',
-    minWidth: 100,
-    align: 'center',
-    format: (value: number) => value.toLocaleString('en-US')
-  },
-
+  { id: 'winner', label: "Winner", minWidth: 200, align: 'center' },
 ];
 
 interface Data {
@@ -52,88 +41,48 @@ interface Data {
 const myAddress = "0xE813d775f33a97BDA25D71240525C724423D4Cd0";
 
 
-let data = [
-  {
-    id: 1,
-    prize: "100",
-    winner: "0xE813d775f33a97BDA25D71240525C724423D4Cd0",
-    status: "Claimed",
-  },
-  {
-    id: 2,
-    prize: "100",
-    winner: myAddress,
-    status: "Not Claimed",
-  },
-  {
-    id: 3,
-    prize: "100",
-    winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
-    status: "Not Claimed",
-  },
-  {
-    id: 4,
-    prize: "100",
-    winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
-    status: "Not Claimed",
-  },
-  { 
-    id: 5,
-    prize: "100",
-    winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
-    status: "Not Claimed",
-  },
-  {
-    id: 6,
-    prize: "100",
-    winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
-    status: "Not Claimed",
-  },
-];
+// let data = [
+//   {
+//     id: 1,
+//     prize: "100",
+//     winner: "0xE813d775f33a97BDA25D71240525C724423D4Cd0",
+//   },
+//   {
+//     id: 2,
+//     prize: "100",
+//     winner: myAddress,
+//   },
+//   {
+//     id: 3,
+//     prize: "100",
+//     winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
+//   },
+//   {
+//     id: 4,
+//     prize: "100",
+//     winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
+//   },
+//   { 
+//     id: 5,
+//     prize: "100",
+//     winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
+//   },
+//   {
+//     id: 6,
+//     prize: "100",
+//     winner: "0x17cb493156707D8b8CA03DD6cbf3c034f4513497",
+//   },
+// ];
 
 
 export const LotteryTable = () => {
 
-  const [rows, setRows] = useState(data);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
+  console.log("All ", lotteryData.allLotteries)
 
-  // const increaseCount = (id: number) => {
-  //   setRows((rows) =>
-  //     rows.map((row) => {
-  //       if (row.count < 10 && row.id === id) {
-  //         return {
-  //           ...row,
-  //           count: row.count++
-  //         }
-  //       }
-  //       else {
-  //         return {
-  //           ...row
-  //         }
-  //       }
-  //     })
-  //   )
-  // }
-
-  // const decreaseCount = (id: number) => {
-  //   setRows((rows) =>
-  //     rows.map((row) => {
-  //       if (row.count > 0 && row.id === id) {
-  //         return {
-  //           ...row,
-  //           count: row.count--
-  //         }
-  //       }
-  //       else {
-  //         return {
-  //           ...row
-  //         }
-  //       }
-  //     })
-  //   )
-  // }
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -143,6 +92,27 @@ export const LotteryTable = () => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+
+
+  
+  
+  if(!lotteryData.allLotteries){
+    return (
+      <div style={{border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}> <CircularProgress size={50} sx={{color: "#fff"}} /> </div>
+      )
+    }
+    
+    console.log( "Contains ",  lotteryData?.allLotteries?.some((lottery) => Number(lottery.staus) === 1) )
+
+    const drawExists = lotteryData?.allLotteries?.some((lottery) => Number(lottery.staus) === 1);
+
+    if(!drawExists){
+      return(
+        <div>No Draw Result Exists </div>
+      )
+    }
+
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -163,44 +133,23 @@ export const LotteryTable = () => {
           </TableHead>
 
           <TableBody sx={{ border: "1px solid black" }}>
-            {rows
+            {lotteryData.allLotteries && lotteryData.allLotteries
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow
-                  key={row.id}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell align="center">{row.id}</TableCell>
-                  <TableCell align="center">{row.prize}</TableCell>
-                  <TableCell align="center">{shortenIfAddress(row.winner)}</TableCell>
-                  <TableCell align="center">{row.status}</TableCell>
-                  <TableCell align="center" >
-
-                    {
-                      row.status === "Not Claimed" && row.winner === myAddress && (
-                        <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
-                          <Button variant='contained' 
-                          sx={{ 
-                              bgcolor: "#ff6565", 
-                              fontSize: "8px", 
-                              width: "30px", 
-                              borderRadius: 0 ,
-                              '&:hover': { 
-                                bgcolor: "#737473",
-                                color: "#fff",
-                                borderColor: "transparent",
-                                }
-                
-                            }}>
-                               Claim
-                          </Button>
-                        </div>
-                      )
-                    }
-
-                  </TableCell>
-
-                </TableRow>
+              .map((lottery) => (
+                <>
+                {
+                  Number(lottery.staus) === 1 && (
+                    <TableRow
+                      key={Number(lottery.id)}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell align="center">{Number(lottery.id)}</TableCell>
+                      <TableCell align="center">{Number(lottery.prize)}</TableCell>
+                      <TableCell align="center">{lottery.winner}</TableCell>
+                    </TableRow>
+                  )
+                }
+                </>
               ))}
           </TableBody>
 
@@ -210,7 +159,7 @@ export const LotteryTable = () => {
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={rows.length}
+        count={lotteryData?.allLotteries?.length || 0}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,9 +15,10 @@ import { useDispatch, useSelector } from 'react-redux';
 // import moment from 'moment';
 import Countdown from "react-countdown";
 import CircularProgress from '@mui/material/CircularProgress';
+import { ethers } from "ethers";
 
 interface Column {
-  id: 'id' | 'price' | 'time' | 'contributions' | 'button';
+  id: 'id' | 'price' | 'time' | 'contributions' | 'funds' | 'button';
   label: string;
   minWidth: number;
   align?: 'right' | "center";
@@ -27,18 +28,18 @@ interface Column {
 let columns: readonly Column[] = [
   { id: 'id', label: 'ID', minWidth: 50, align: 'center' },
   { id: 'price', label: "Price", minWidth: 50, align: 'center' },
-  { id: 'contributions', label: "Participants/Tickets", minWidth: 100, align: 'center' },
+  { id: 'contributions', label: "Participants/Tickets", minWidth: 50, align: 'center' },
   {
     id: 'time',
     label: 'Time Left',
-    minWidth: 100,
+    minWidth: 50,
     align: 'center',
     format: (value: number) => value.toLocaleString('en-US'),
   },
   {
     id: 'button',
     label: '',
-    minWidth: 100,
+    minWidth: 50,
     align: 'center',
     format: (value: number) => value.toLocaleString('en-US')
   },
@@ -108,14 +109,14 @@ let columns: readonly Column[] = [
 
 
 export const LotteryTable = () => {
+  
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
 
   const dispatch = useDispatch();
 
   const {lotteryData, networkDetail, masterContract} = useSelector((state: DataType) => state);
 
   console.log("lotteryData", lotteryData);
-
-  // const [rows, setRows] = useState(data);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -128,6 +129,55 @@ export const LotteryTable = () => {
 
   const decreaseCountFn = (id: number) => {
     dispatch(decreaseCount(id))
+  }
+
+  const buyTicket = async (id:number, count: number, price:number) => {
+    const totalCost = count*price;
+    const res = window.confirm(`Approve ${totalCost} OURs for ${count} tickets`)
+    if(res){
+      const signer = provider.getSigner()
+      const approveTokens = masterContract.erc20Methods.connect(signer);
+      const buy = masterContract.lotteryMethods.connect(signer);
+
+      try{
+        const tx1 = await approveTokens.approve(masterContract.lotteryAddress, totalCost);
+        let receipt1 = await tx1.wait();
+        console.log(receipt1);
+
+        const tx2 = await buy.buyATicket(id, count);
+        let receipt2 = await tx2.wait();
+        console.log(receipt2);
+
+
+      }
+      catch(e){
+        console.log(e)
+      }
+
+    }
+
+  }
+
+  const endALottery = async () => {
+
+    if( masterContract.linkBalance && masterContract.linkBalance >= 0.1 ){
+      alert("Ask owner to topup LINK Tokens to find randomness");
+      return;
+    }
+    
+    const signer = provider.getSigner()
+    const end = masterContract.lotteryMethods.connect(signer);
+    try{
+      const tx1 = await end.endALottery();
+      let receipt1 = await tx1.wait();
+      console.log(receipt1);
+    }
+    catch(e){
+      console.log(e)
+    }
+
+
+    
   }
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -151,8 +201,7 @@ export const LotteryTable = () => {
       }
   };
 
-  
-  
+ 
   if(!lotteryData.activeLottries){
     return (
       <div style={{border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}> <CircularProgress size={50} sx={{color: "#fff"}} /> </div>
@@ -201,7 +250,7 @@ export const LotteryTable = () => {
                           
                           <span onClick={() => decreaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginRight: "2px" }}> - </span>
                           
-                          <Button variant='contained'
+                          <Button variant='contained' onClick={() => buyTicket(Number(lottery.id), lottery.count, Number(lottery.priceOfTicket)) }
                           sx={{ 
                               bgcolor: "#ff6565", 
                               fontSize: "8px", 
@@ -236,7 +285,7 @@ export const LotteryTable = () => {
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={lotteryData.activeLottries.length}
+        count={lotteryData?.activeLottries?.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

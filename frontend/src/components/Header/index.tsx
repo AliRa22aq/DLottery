@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { makeStyles } from '@mui/styles';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { DataType, setActiveUser, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { DataType, readLinkBalance, setActiveUser, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
 import { ethers } from "ethers";
 
 import { getChainName , shortenIfAddress } from "@usedapp/core";
@@ -73,6 +73,17 @@ const Header = () => {
         dispatch(setActiveUserInfo({address: account, balance: Number(balance), erc20Symbol: symbol}));
         dispatch(setNetworkDetails({ id: Number(network.chainId), chain: getChainName(Number(network.chainId)) }));
             
+
+        
+        const linkBalance = await lotteryContract.linkBalance();
+        const ourBalance = await await erc20Contract.balanceOf(masterContract.lotteryAddress);
+        
+        console.log("linkBalance", Number(ethers.utils.formatEther(linkBalance)))
+
+        dispatch(readLinkBalance({
+            linkBalance: Number(ethers.utils.formatEther(linkBalance)),
+            ourBalance: Number(ethers.utils.formatEther(ourBalance)),
+        }))
     }
 
 
@@ -119,8 +130,7 @@ const Header = () => {
                     <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
                     <Divider />
                     <MenuItem onClick={handleClose}>LINK balance: {masterContract.linkBalance}</MenuItem>
-
-
+                    <MenuItem onClick={handleClose}>Our balance: {masterContract.ourBalance}</MenuItem>
 
                 </Menu>
             <div className={classes.headerElement2}>

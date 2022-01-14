@@ -39,11 +39,12 @@ const UpcomingLotteries = () => {
                     dispatch(addActiveLotteries(newInfo))
                 })
 
-                const linkBalance = await lotteryContract.linkBalance();
+                // const linkBalance = await lotteryContract.linkBalance();
+                // const ourBalance = await 
                 
-                console.log("linkBalance", Number(ethers.utils.formatEther(linkBalance)))
+                // console.log("linkBalance", Number(ethers.utils.formatEther(linkBalance)))
 
-                dispatch(readLinkBalance(Number(ethers.utils.formatEther(linkBalance))))
+                // dispatch(readLinkBalance(Number(ethers.utils.formatEther(linkBalance))))
           
                 
         

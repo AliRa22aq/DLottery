@@ -9,6 +9,7 @@ interface MasterContract {
   erc20Symbol: string,
   erc20Methods: any,
   linkBalance: number | null
+  ourBalance: number | null
 }
 
 interface NetworkDetail {
@@ -68,6 +69,7 @@ const initialState: DataType = {
     erc20Symbol: "",
     erc20Methods: null,
     linkBalance: null,
+    ourBalance: null
   
   },
   lotteryData: {
@@ -122,8 +124,9 @@ const dataSlice = createSlice({
       }
     },
     
-    readLinkBalance(state, {payload}: PayloadAction<number>){
-      state.masterContract.linkBalance = payload;
+    readLinkBalance(state, {payload}: PayloadAction<{linkBalance: number, ourBalance: number}>){
+      state.masterContract.linkBalance = payload.linkBalance;
+      state.masterContract.ourBalance = payload.ourBalance;
     },
 
     increaseCount(state, { payload }: PayloadAction<number>) {

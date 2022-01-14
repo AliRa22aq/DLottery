@@ -153,6 +153,8 @@ export const LotteryTable = () => {
         const tx2 = await buy.buyATicket(id, count);
         let receipt2 = await tx2.wait();
         console.log(receipt2);
+        location.reload();
+
 
 
       }
@@ -179,6 +181,8 @@ export const LotteryTable = () => {
       const tx1 = await end.endALottery();
       let receipt1 = await tx1.wait();
       console.log(receipt1);
+      location.reload();
+
     }
     catch(e){
       console.log(e)
@@ -256,7 +260,8 @@ export const LotteryTable = () => {
                   <TableCell align="center" >
 
                     {
-                      lottery.status === 0  &&  currentTime < Number(lottery.endingtime)*1000  &&  (
+                      lottery.status === 0  &&  
+                      currentTime < Number(lottery.endingtime)*1000  &&  (
                         <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
                           
                           <span onClick={() => decreaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginRight: "2px" }}> - </span>
@@ -304,7 +309,6 @@ export const LotteryTable = () => {
                         <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
                           <Button 
                             variant='contained' 
-                            onClick={endALottery}
                             sx={{ bgcolor: "#ff6565", fontSize: "8px", width: "30px", borderRadius: 0, 
                               '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
                             }}>

@@ -922,14 +922,14 @@ contract Lottery is Ownable, VRFConsumerBase {
     uint256 public randomResult;
     
     constructor(address _OURAddress, address _charityWallet) VRFConsumerBase(
-            0xa555fC018435bef5A13C6c6870a9d4C11DEC329C, // VRF Coordinator
-            0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06   // LINK Token
+            0x747973a5A2a4Ae1D3a8fDF5479f1514F65Db9C31, // VRF Coordinator
+            0x404460C6A5EdE2D891e8297795264fDe62ADBB75   // LINK Token
         )
     {
         OURAddress = _OURAddress;
         charityWallet = _charityWallet;
-        keyHash = 0xcaf3c3727e033261d383b315559476f48034c13b18f8cafed4d871abe5049186;
-        fee = 0.1 * 10 ** 18; // 0.1 LINK 
+        keyHash = 0xc251acd21ec4fb7f31bb8868288bfdbaeb4fbfec2df3735ddbd4f7dc8d60103c;
+        fee = 0.2 * 10 ** 18; // 0.1 LINK 
     }
 
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -992,7 +992,6 @@ contract Lottery is Ownable, VRFConsumerBase {
         require( block.timestamp < lotteryInfo[_id].endingtime , "Lottery has been expired. Try next time" );
         _;
     }
-
 
     // Internal functions to be used by other functions.
     function addActiveUser() internal returns (bool) {
@@ -1092,7 +1091,6 @@ contract Lottery is Ownable, VRFConsumerBase {
 
         address winnerAddr = lotteryInfo[_id].partipants[winnerIndex];
         lotteryInfo[_id].winner = winnerAddr;
-
 
         uint prize = lotteryInfo[_id].accumulatedFunds.mul(90).div(100);
         uint ownerCommision = lotteryInfo[_id].accumulatedFunds.mul(4).div(100);

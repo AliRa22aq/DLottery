@@ -42,6 +42,10 @@ const Header = () => {
         dispatch(setActiveUser(accounts[0]))
     })
 
+    window.ethereum.on('chainChanged', function (accounts: any) {
+        location.reload();
+    })
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const classes = useStyles();
     const dispatch = useDispatch();

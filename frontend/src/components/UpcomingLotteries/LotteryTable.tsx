@@ -226,7 +226,7 @@ export const LotteryTable = () => {
                             variant='contained' 
                             onClick={() => buyTicket(Number(lottery.id), lottery.count, Number(lottery.priceOfTicket)) }
                             sx={{ 
-                              bgcolor: "#ff6565", fontSize: "8px", width: "30px", borderRadius: 0 ,
+                              bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0 ,
                               '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent"}
                             }}>
                                Buy {lottery.count}
@@ -246,7 +246,7 @@ export const LotteryTable = () => {
                           <Button
                             variant='contained'
                             onClick={ () => endALottery(Number(lottery.id)) }
-                            sx={{ bgcolor: "#ff6565", fontSize: "8px", width: "30px", borderRadius: 0,
+                            sx={{ bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0,
                               '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
                             }}>
                               END                            
@@ -265,7 +265,7 @@ export const LotteryTable = () => {
                         <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
                           <Button 
                             variant='contained' 
-                            sx={{ bgcolor: "#ff6565", fontSize: "8px", width: "30px", borderRadius: 0, 
+                            sx={{ bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0, 
                               '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
                             }}>
                               Processing             

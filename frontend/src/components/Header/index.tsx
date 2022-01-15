@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { DataType, readLinkBalance, setActiveUser, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
 import { ethers } from "ethers";
 
-import { getChainName , shortenIfAddress } from "@usedapp/core";
+import { getChainName, shortenIfAddress } from "@usedapp/core";
 import logo from '../assests/logo.png'
 import logo2 from '../assests/logo2.png'
 import Discord from '../assests/Discord.svg'
@@ -31,38 +31,38 @@ import Link from '@mui/material/Link';
 import { useEthers } from "@usedapp/core";
 
 
-const LotteryABI = require("../../abis/Lottery.json") 
-const ERC20ABI = require("../../abis/TestCoin.json") 
+const LotteryABI = require("../../abis/Lottery.json")
+const ERC20ABI = require("../../abis/TestCoin.json")
 
 
 
 const Header = () => {
-      
+
     window.ethereum.on('accountsChanged', function (accounts: any) {
         dispatch(setActiveUser(accounts[0]))
     })
-    
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const classes = useStyles();
     const dispatch = useDispatch();
-    const {userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
+    const { userInfo, networkDetail, masterContract } = useSelector((state: DataType) => state);
 
-    const {  account, activateBrowserWallet, deactivate } = useEthers();
+    const { account, activateBrowserWallet, deactivate } = useEthers();
     const isConnected = account !== undefined;
-    
-    
-    useEffect(()=> {
+
+
+    useEffect(() => {
         getBlockChainData();
     }, [userInfo.userAddress, account])
 
     const getBlockChainData = async () => {
 
-        const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
-        const erc20Contract = new ethers.Contract(masterContract.erc20Address , ERC20ABI.abi , provider)
-        dispatch(setContractMethods({lotteryMethods: lotteryContract, erc20Methods: erc20Contract}))
+        const lotteryContract = new ethers.Contract(masterContract.lotteryAddress, LotteryABI.abi, provider)
+        const erc20Contract = new ethers.Contract(masterContract.erc20Address, ERC20ABI.abi, provider)
+        dispatch(setContractMethods({ lotteryMethods: lotteryContract, erc20Methods: erc20Contract }))
 
         const network = await provider.getNetwork()
-        if(Number(network.chainId) !== 97) {
+        if (Number(network.chainId) !== 97) {
             alert("Please connect to Binance Test net to use this Dapp")
         }
 
@@ -70,17 +70,19 @@ const Header = () => {
 
         const linkBalance = await lotteryContract.linkBalance();
         const ourBalance = await await erc20Contract.balanceOf(masterContract.lotteryAddress);
-        
+        const charity = await await lotteryContract.charityBalance();
+
         dispatch(readLinkBalance({
             linkBalance: Number(ethers.utils.formatEther(linkBalance)),
             ourBalance: Number(ethers.utils.formatEther(ourBalance)),
+            charity: Number(charity)
         }))
 
         const symbol = await erc20Contract.symbol();
 
-        if(account){
-            const balance = await erc20Contract.balanceOf(account);            
-            dispatch(setActiveUserInfo({address: account, balance: Number(balance), erc20Symbol: symbol}));
+        if (account) {
+            const balance = await erc20Contract.balanceOf(account);
+            dispatch(setActiveUserInfo({ address: account, balance: Number(balance), erc20Symbol: symbol }));
         }
     }
 
@@ -88,12 +90,12 @@ const Header = () => {
     const open = Boolean(anchorEl);
 
     const handleClick = (event: any) => {
-      setAnchorEl(event.currentTarget);
+        setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
-      setAnchorEl(null);
+        setAnchorEl(null);
     };
-  
+
     return (
         <div className={classes.headerContainer}>
 
@@ -101,86 +103,87 @@ const Header = () => {
                 aria-controls={open ? 'basic-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
-                onClick={(e) => handleClick(e)}                
+                onClick={(e) => handleClick(e)}
             >
-                    <MenuIcon />
+                <MenuIcon />
             </div>
-                <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{ 'aria-labelledby': 'basic-button' }}
+            <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                MenuListProps={{ 'aria-labelledby': 'basic-button' }}
+            >
+                <Link href="/" sx={{ textDecoration: "none", color: "#000" }} >
+                    <MenuItem onClick={handleClose}>ANONYMOUS</MenuItem>
+                </Link>
+
+                <MenuItem> JACKPOT  <span style={{ color: "#ff0000", marginLeft: "5px" }}> (coming soon) </span> </MenuItem>
+                <MenuItem> LIFETIME <span style={{ color: "#ff0000", marginLeft: "5px" }}> (coming soon) </span> </MenuItem>
+                <Divider />
+
+                <Link
+                    href="https://gateway.pinata.cloud/ipfs/QmahBD58Twv1hjyEvDiY6EZLWXjfuA6U5FVJYKQ9HG3jub?preview=1"
+                    target='_blank'
+                    sx={{ textDecoration: "none", color: "#000" }}
                 >
-                    <Link href="/" sx={{textDecoration: "none", color: "#000"}} >
-                        <MenuItem onClick={handleClose}>ANONYMOUS</MenuItem>
-                    </Link>
 
-                    <MenuItem> JACKPOT  <span style={{color: "#ff0000", marginLeft:"5px" }}> (coming soon) </span> </MenuItem>
-                    <MenuItem> LIFETIME <span style={{color: "#ff0000", marginLeft:"5px" }}> (coming soon) </span> </MenuItem>
-                    <Divider />
+                    <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
 
-                    <Link 
-                        href="https://gateway.pinata.cloud/ipfs/QmahBD58Twv1hjyEvDiY6EZLWXjfuA6U5FVJYKQ9HG3jub?preview=1" 
-                        target= '_blank'
-                        sx={{textDecoration: "none", color: "#000"}}
-                        >
+                </Link>
 
-                        <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
-                    
-                    </Link>
+                <Link
+                    href="https://gateway.pinata.cloud/ipfs/QmTfHqxpnpEjVc8KTJue6yr6DEEg3QkfjguWtfmYgUHV76?preview=1"
+                    target='_blank'
+                    sx={{ textDecoration: "none", color: "#000" }}
+                >
 
-                    <Link 
-                        href="https://gateway.pinata.cloud/ipfs/QmTfHqxpnpEjVc8KTJue6yr6DEEg3QkfjguWtfmYgUHV76?preview=1" 
-                        target= '_blank'
-                        sx={{textDecoration: "none", color: "#000"}}
-                        >
+                    <MenuItem onClick={handleClose}> Whitepaper </MenuItem>
 
-                        <MenuItem onClick={handleClose}> Whitepaper </MenuItem>
-                    
-                    </Link>
+                </Link>
 
-                    <Divider />
+                <Divider />
 
-                    <Link 
-                        href="https://discord.gg/5YMTMbw9m4" 
-                        target= '_blank'
-                        sx={{textDecoration: "none", color: "#000"}}
-                        >
-                        {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
-                        <MenuItem onClick={handleClose}> <img src={Discord} alt="Discord" height="30px" width="30px" />
-                        <span style={{marginLeft: "5px"}}>Discord  </span>
-                        </MenuItem>
-                    </Link>
+                <Link
+                    href="https://discord.gg/5YMTMbw9m4"
+                    target='_blank'
+                    sx={{ textDecoration: "none", color: "#000" }}
+                >
+                    {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
+                    <MenuItem onClick={handleClose}> <img src={Discord} alt="Discord" height="30px" width="30px" />
+                        <span style={{ marginLeft: "5px" }}>Discord  </span>
+                    </MenuItem>
+                </Link>
 
-                    <Link 
-                        href="https://twitter.com/bedecent_lotto" 
-                        target= '_blank'
-                        sx={{textDecoration: "none", color: "#000"}}
-                        >
-                        {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
-                        <MenuItem onClick={handleClose}> <img src={Twitter} alt="Twitter" height="30px" width="30px" /> 
-                        <span style={{marginLeft: "5px"}}> Twitter </span>
-                        </MenuItem>
-                    </Link>
+                <Link
+                    href="https://twitter.com/bedecent_lotto"
+                    target='_blank'
+                    sx={{ textDecoration: "none", color: "#000" }}
+                >
+                    {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
+                    <MenuItem onClick={handleClose}> <img src={Twitter} alt="Twitter" height="30px" width="30px" />
+                        <span style={{ marginLeft: "5px" }}> Twitter </span>
+                    </MenuItem>
+                </Link>
 
-                    <Link 
-                        href="https://t.me/+XzZEgDhlmKA3OWM1" 
-                        target= '_blank'
-                        sx={{textDecoration: "none", color: "#000"}}
-                        >
-                        {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
-                        <MenuItem onClick={handleClose}> <img src={Telegram} alt="Telegram" height="30px" width="30px" /> 
-                        <span style={{marginLeft: "5px"}}>Telegram  </span>
-                        </MenuItem>
-                    </Link>
-                    
-                    <Divider />
-                    
-                    <MenuItem> LINK balance: {masterContract.linkBalance}</MenuItem>
-                    <MenuItem> Our balance: {masterContract.ourBalance}</MenuItem>
+                <Link
+                    href="https://t.me/+XzZEgDhlmKA3OWM1"
+                    target='_blank'
+                    sx={{ textDecoration: "none", color: "#000" }}
+                >
+                    {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
+                    <MenuItem onClick={handleClose}> <img src={Telegram} alt="Telegram" height="30px" width="30px" />
+                        <span style={{ marginLeft: "5px" }}>Telegram  </span>
+                    </MenuItem>
+                </Link>
 
-                </Menu>
+                <Divider />
+
+                <MenuItem> LINK balance: {masterContract.linkBalance}</MenuItem>
+                {/* <MenuItem> Our balance: {masterContract.ourBalance}</MenuItem> */}
+                <MenuItem> Charity balance: {masterContract.charity}</MenuItem>
+
+            </Menu>
 
             <div className={classes.headerElement2}>
                 <img src={logo} alt="LOGO" width="70px" height="70px" />
@@ -190,18 +193,30 @@ const Header = () => {
             <div className={classes.headerElement3} >
                 {
                     isConnected ? (
-                        <Button sx={{color: "#fff", fontSize: "16px", fontWeight: "500"}} 
-                        onClick={deactivate}>
-                        Disconnect
+                        <Button
+                            variant='contained'
+                            // sx={{bgcolor:"#ffb409", color: "#fff", fontSize: "16px", fontWeight: "500", borderRadius: 0}} 
+                            sx={{
+                                bgcolor: "#ffb409",
+                                fontSize: "10px",
+                                color: "#000",
+                                height: "30px",
+                                width: "100px",
+                                borderRadius: 0,
+                                '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent" }
+                            }}
+                            onClick={deactivate}
+                        >
+                            Disconnect
                         </Button>
                     ) : (
-                        <Button sx={{color: "#fff", fontSize: "16px", fontWeight: "500"}} 
-                        onClick={() => activateBrowserWallet()}>
-                        <img 
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/800px-MetaMask_Fox.svg.png"
-                            alt="metamask" 
-                            width="50px"
-                            height="50px"
+                        <Button sx={{ color: "#fff", fontSize: "16px", fontWeight: "500" }}
+                            onClick={() => activateBrowserWallet()}>
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/800px-MetaMask_Fox.svg.png"
+                                alt="metamask"
+                                width="50px"
+                                height="50px"
                             />
                         </Button>
                     )
@@ -216,21 +231,23 @@ export default Header
 
 const useStyles = makeStyles({
     headerContainer: {
-        
-        background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+
+        // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+        background: "#000",
+        boxShadow: '0 3px 5px 2px rgba(255, 180, 9, 0.3)',
+
         border: 0,
         //   border: "1px solid black",
 
-      borderRadius: 3,
-      boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
-      color: 'white',
-      fontSize: "16px",
-      fontWeight: "600",
-      height: 48,
-      padding: '10px 20px',
-      margin: "0px 00px",
-      display: "flex",
-      justifyContent: "space-between",
+        borderRadius: 3,
+        color: 'white',
+        fontSize: "16px",
+        fontWeight: "600",
+        height: 52,
+        padding: '10px 20px',
+        margin: "0px 00px",
+        display: "flex",
+        justifyContent: "space-between",
 
     },
     headerElement1: {
@@ -271,7 +288,7 @@ const useStyles = makeStyles({
     username: {
         // border: "1px solid black",
         marginLeft: "10px",
-        
+
     },
     chainName: {
         "@media (max-width: 900px)": {
@@ -282,5 +299,4 @@ const useStyles = makeStyles({
     link: {
         textDecoration: "none", color: "#000"
     }
-  });
-  
+});

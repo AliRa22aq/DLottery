@@ -7,6 +7,8 @@ import SumbitALottery from './components/SumbitALottery';
 import UpcomingLotteries from './components/UpcomingLotteries';
 import LotteryResults from './components/LotteryResults';
 import { makeStyles } from '@mui/styles';
+import background from './components/assests/background4.jpeg'
+import background2 from './components/assests/background3.jpeg'
 
 
 function App() {
@@ -36,8 +38,18 @@ const useStyles = makeStyles({
   rootMian: {
     // border: "1px solid black",
     background: "#fff",
-    height: "99vh",
+    height: "100vh",
     width: "100%",
+    // background: "#492828",
+    // backgroundImage: `url(${background})`,
+    // backgroundRepeat: 'no-repeat',
+    // backgroundPosition: "center", /* Center the image */
+    // backgroundSize: "cover", /* Resize the background image to cover the entire container */
+    "@media (max-width: 900px)": {
+      // backgroundImage: `url(${background2})`,
+    }
+
+
 
   },
   mianContainer: {

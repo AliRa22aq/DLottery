@@ -9,7 +9,8 @@ interface MasterContract {
   erc20Symbol: string,
   erc20Methods: any,
   linkBalance: number | null
-  ourBalance: number | null
+  ourBalance: number | null,
+  charity: number | null
 }
 
 interface NetworkDetail {
@@ -63,13 +64,14 @@ const initialState: DataType = {
   loading: false,
   transectionProgress: false,
   masterContract: {
-    lotteryAddress: "0xa57B160D99Af7fb60448bb2733326c84cDf6A23C",
+    lotteryAddress: "0x87ee828b945Bf2ebFC9B964c0beCF0B6C97CCE30",
     lotteryMethods: null,
     erc20Address: "0x78D85b6CA607e628f2981198EDF0f28E7A571E5f",
     erc20Symbol: "",
     erc20Methods: null,
     linkBalance: null,
-    ourBalance: null
+    ourBalance: null,
+    charity: null
   
   },
   lotteryData: {
@@ -148,9 +150,12 @@ const dataSlice = createSlice({
     },
 
     
-    readLinkBalance(state, {payload}: PayloadAction<{linkBalance: number, ourBalance: number}>){
+    readLinkBalance(state, {payload}: PayloadAction<{linkBalance: number, ourBalance: number, charity: number}>){
       state.masterContract.linkBalance = payload.linkBalance;
       state.masterContract.ourBalance = payload.ourBalance;
+      state.masterContract.charity = payload.charity;
+
+      
     },
 
     increaseCount(state, { payload }: PayloadAction<number>) {

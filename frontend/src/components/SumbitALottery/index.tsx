@@ -3,6 +3,9 @@ import { makeStyles } from '@mui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { ethers } from "ethers";
 import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
+
+
 // import Web3 from "web3"
 import { DataType } from '../Store';
 
@@ -89,7 +92,21 @@ const SumbitALottery = () => {
                 <input type="datetime-local" value={date} onChange={(e)=> handleDateChange(e.target.value)} placeholder='Deadline' className={classes.inputContainer}/>
 
                 <Tooltip title="You need to hold atleasr 10,000 Tokens to start a lottery">
-                    <button onClick={launchLottery}  className={classes.buttonContainer}>  Launch </button>
+                    {/* <button onClick={launchLottery}  className={classes.buttonContainer}>  Launch </button> */}
+                    <Button 
+                            variant='contained' 
+                            onClick={launchLottery}
+                            sx={{ 
+                              bgcolor: "#ffb409", 
+                              fontSize: "10px", 
+                              color: "#000", 
+                              height: "30px",
+                              width: "100px",                      
+                              borderRadius: 0 ,
+                              '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent"}
+                            }}>
+                               Launch
+                          </Button>
                 </Tooltip>
 
             </div>
@@ -111,10 +128,11 @@ export default SumbitALottery;
 
 const useStyles = makeStyles({
     submitContainer: {
-      background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-      border: 0,
+        // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+        background: "#000",
+        border: 0,
       borderRadius: 3,
-      boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+      boxShadow: '0 3px 5px 2px rgba(255, 180, 9, 0.3)',
       color: 'white',
       fontSize: "16px",
       fontWeight: "600",

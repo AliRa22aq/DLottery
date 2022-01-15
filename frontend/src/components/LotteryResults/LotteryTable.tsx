@@ -7,12 +7,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import Button from '@mui/material/Button';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { shortenIfAddress } from "@usedapp/core";
-import { useDispatch, useSelector } from 'react-redux';
-import { decreaseCount ,increaseCount, LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { useSelector } from 'react-redux';
+import { DataType} from '../Store';
 import CircularProgress from '@mui/material/CircularProgress';
 import { makeStyles } from '@mui/styles';
 
@@ -38,9 +34,7 @@ export const LotteryTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const {lotteryData, masterContract} = useSelector((state: DataType) => state);
-  // console.log("All ", lotteryData.allLotteries)
-
+  const { lotteryData, masterContract } = useSelector((state: DataType) => state);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -51,21 +45,19 @@ export const LotteryTable = () => {
     setPage(0);
   };
 
-  if(!lotteryData.allLotteries){
+  if (!lotteryData.allLotteries) {
     return (
-      <div style={{border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}> <CircularProgress size={50} sx={{color: "#fff"}} /> </div>
-      )
-    }
-    
-    // console.log( "Contains ",  lotteryData?.allLotteries?.some((lottery) => Number(lottery.status) === 2) )
+      <div style={{ border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}> <CircularProgress size={50} sx={{ color: "#fff" }} /> </div>
+    )
+  }
 
-    const drawExists = lotteryData?.allLotteries?.some((lottery) => Number(lottery.status) === 2);
+  const drawExists = lotteryData?.allLotteries?.some((lottery) => Number(lottery.status) === 2);
 
-    if(!drawExists){
-      return(
-        <div>No Draw Result Exists </div>
-      )
-    }
+  if (!drawExists) {
+    return (
+      <div>No Draw Result Exists </div>
+    )
+  }
 
 
   return (
@@ -90,16 +82,16 @@ export const LotteryTable = () => {
             {lotteryData.allLotteries && lotteryData.allLotteries
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((lottery) => (
-                  lottery.status === 2 && (
-                    <TableRow
-                      key={Number(lottery.id)}
-                      sx={{ border: "1px solid black", fontSize: '10px', '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                      <TableCell sx={{ border: "0px solid black", fontSize: '10px'}}  align="center"> {Number(lottery.id)} </TableCell>
-                      <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{Number(lottery.prize)} {masterContract.erc20Symbol} </TableCell>
-                      <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center"> {lottery.winner} </TableCell>
-                    </TableRow>
-                  )
+                lottery.status === 2 && (
+                  <TableRow
+                    key={Number(lottery.id)}
+                    sx={{ border: "1px solid black", fontSize: '10px', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center"> {Number(lottery.id)} </TableCell>
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center">{Number(lottery.prize)} {masterContract.erc20Symbol} </TableCell>
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center"> {lottery.winner} </TableCell>
+                  </TableRow>
+                )
               ))}
           </TableBody>
 
@@ -121,7 +113,7 @@ export const LotteryTable = () => {
 
 
 const useStyles = makeStyles({
-  row : {
+  row: {
     // border: "1px solid black",
     // fontSize: "8px"
   }

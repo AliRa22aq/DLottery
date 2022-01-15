@@ -4,9 +4,9 @@ import reducer from './index';
 const store = configureStore({
   reducer: reducer,
   middleware: getDefaultMiddleware =>
-  getDefaultMiddleware({
-    serializableCheck: false,
-  }),
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 })
 
 export default store

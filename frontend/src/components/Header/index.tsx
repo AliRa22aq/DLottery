@@ -5,26 +5,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { DataType, readLinkBalance, setActiveUser, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
 import { ethers } from "ethers";
 
-import { getChainName, shortenIfAddress } from "@usedapp/core";
+import { getChainName } from "@usedapp/core";
 import logo from '../assests/logo.png'
 import logo2 from '../assests/logo2.png'
 import Discord from '../assests/Discord.svg'
 import Telegram from '../assests/Telegram.svg'
 import Twitter from '../assests/Twitter.svg'
 
-
-// import Web3Modal from "web3modal";
-// import WalletConnectProvider from "@walletconnect/web3-provider";
-// import detectEthereumProvider from '@metamask/detect-provider';
-
-// const Web3 = require('web3');
-// var Web3 = require('web3');
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
-import Badge from '@mui/material/Badge';
 import Link from '@mui/material/Link';
 
 
@@ -131,7 +123,6 @@ const Header = () => {
                     target='_blank'
                     sx={{ textDecoration: "none", color: "#000" }}
                 >
-
                     <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
 
                 </Link>
@@ -141,7 +132,6 @@ const Header = () => {
                     target='_blank'
                     sx={{ textDecoration: "none", color: "#000" }}
                 >
-
                     <MenuItem onClick={handleClose}> Whitepaper </MenuItem>
 
                 </Link>
@@ -153,7 +143,6 @@ const Header = () => {
                     target='_blank'
                     sx={{ textDecoration: "none", color: "#000" }}
                 >
-                    {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
                     <MenuItem onClick={handleClose}> <img src={Discord} alt="Discord" height="30px" width="30px" />
                         <span style={{ marginLeft: "5px" }}>Discord  </span>
                     </MenuItem>
@@ -164,7 +153,6 @@ const Header = () => {
                     target='_blank'
                     sx={{ textDecoration: "none", color: "#000" }}
                 >
-                    {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
                     <MenuItem onClick={handleClose}> <img src={Twitter} alt="Twitter" height="30px" width="30px" />
                         <span style={{ marginLeft: "5px" }}> Twitter </span>
                     </MenuItem>
@@ -175,7 +163,6 @@ const Header = () => {
                     target='_blank'
                     sx={{ textDecoration: "none", color: "#000" }}
                 >
-                    {/* <MenuItem onClick={handleClose}>Discord </MenuItem> */}
                     <MenuItem onClick={handleClose}> <img src={Telegram} alt="Telegram" height="30px" width="30px" />
                         <span style={{ marginLeft: "5px" }}>Telegram  </span>
                     </MenuItem>
@@ -184,7 +171,6 @@ const Header = () => {
                 <Divider />
 
                 <MenuItem> LINK balance: {masterContract.linkBalance}</MenuItem>
-                {/* <MenuItem> Our balance: {masterContract.ourBalance}</MenuItem> */}
                 <MenuItem> Charity balance: {masterContract.charity}</MenuItem>
 
             </Menu>
@@ -199,7 +185,6 @@ const Header = () => {
                     isConnected ? (
                         <Button
                             variant='contained'
-                            // sx={{bgcolor:"#ffb409", color: "#fff", fontSize: "16px", fontWeight: "500", borderRadius: 0}} 
                             sx={{
                                 bgcolor: "#ffb409",
                                 fontSize: "10px",

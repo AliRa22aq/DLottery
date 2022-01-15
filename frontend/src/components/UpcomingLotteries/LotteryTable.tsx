@@ -8,13 +8,10 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
-import { fetchLotteryData, addTickets, decreaseCount ,increaseCount, LotteryData, DataType} from '../Store';
+import { fetchLotteryData, addTickets, decreaseCount, increaseCount, LotteryData, DataType } from '../Store';
 import { useDispatch, useSelector } from 'react-redux';
-// import moment from 'moment';
 import Countdown from "react-countdown";
-// import CircularProgress from '@mui/material/CircularProgress';
 import { ethers } from "ethers";
-// const LotteryABI = require("../../abis/Lottery.json") 
 
 interface Column {
   id: 'id' | 'price' | 'time' | 'contributions' | 'funds' | 'button';
@@ -49,67 +46,54 @@ let columns: readonly Column[] = [
 
 export const LotteryTable = () => {
 
-  // const currentTime = Date.now();
-  // console.log("currentTime ", currentTime)
-  
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-
   const dispatch = useDispatch();
-
-  const {lotteryData, userInfo, masterContract} = useSelector((state: DataType) => state);
-
-
-
+  const { lotteryData, userInfo, masterContract } = useSelector((state: DataType) => state);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
 
   const increaseCountFn = (id: number) => {
-    // console.log("increaseCount", id)
     dispatch(increaseCount(id))
-    // dispatch(addActiveLotteries(newInfo))
-
   }
 
   const decreaseCountFn = (id: number) => {
     dispatch(decreaseCount(id))
   }
 
-  const buyTicket = async (id:number, count: number, price:number) => {
-    
-    if(userInfo.userAddress === ""){
+  const buyTicket = async (id: number, count: number, price: number) => {
+
+    if (userInfo.userAddress === "") {
       alert("Please connect wallet")
-      throw("ERROR");
+      throw ("ERROR");
     }
 
-    const totalCost = count*price;
+    const totalCost = count * price;
 
-    if(userInfo.userBalance < totalCost){
+    if (userInfo.userBalance < totalCost) {
       alert("Not Enough balance")
-      throw("ERROR");
+      throw ("ERROR");
     }
 
     const res = window.confirm(`Approve ${totalCost} OURs for ${count} tickets`)
-    if(res){
+    if (res) {
       const signer = provider.getSigner()
       const approveTokens = masterContract.erc20Methods.connect(signer);
       const buy = masterContract.lotteryMethods.connect(signer);
 
-      try{
+      try {
         const tx1 = await approveTokens.approve(masterContract.lotteryAddress, totalCost);
         let receipt1 = await tx1.wait();
         // console.log(receipt1);
 
         const tx2 = await buy.buyATicket(id, count);
         let receipt2 = await tx2.wait();
-        // console.log(receipt2);
 
-        const refreshedLotteryData = await  masterContract.lotteryMethods.lotteryInfo(id)
-        // console.log(refreshedLotteryData)
+        const refreshedLotteryData = await masterContract.lotteryMethods.lotteryInfo(id)
         dispatch(fetchLotteryData(refreshedLotteryData));
 
       }
-      catch(e){
+      catch (e) {
         console.log(e)
       }
 
@@ -121,26 +105,23 @@ export const LotteryTable = () => {
 
     console.log(masterContract.linkBalance)
 
-    if( Number(masterContract?.linkBalance) < 0.1 ){
+    if (Number(masterContract?.linkBalance) < 0.1) {
       alert("Ask owner to topup LINK Tokens to find randomness");
       return;
     }
-    
+
     const signer = provider.getSigner()
     const end = masterContract.lotteryMethods.connect(signer);
-    try{
+    try {
       const tx1 = await end.endALottery();
       let receipt1 = await tx1.wait();
-      // console.log(receipt1);
-      // location.reload();
-      const refreshedLotteryData = await  masterContract.lotteryMethods.lotteryInfo(id)
-      // console.log(refreshedLotteryData)
+      const refreshedLotteryData = await masterContract.lotteryMethods.lotteryInfo(id)
       dispatch(fetchLotteryData(refreshedLotteryData));
     }
-    catch(e){
+    catch (e) {
       console.log(e)
     }
-    
+
   }
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -153,31 +134,25 @@ export const LotteryTable = () => {
   };
 
   const renderer = ({ days, hours, minutes, seconds, completed }: any) => {
-      if (completed) {
-          // Render a completed state
-          return <div style={{ fontSize: "12px", fontWeight: 500 }}> Expired </div>;
-      } else {
-          // Render a countdown
-          return (
-                <div style={{ fontSize: "12px", fontWeight: 500 }}> {days}:{hours}:{minutes}:{seconds} </div>
-          )
-      }
+    if (completed) {
+      // Render a completed state
+      return <div style={{ fontSize: "12px", fontWeight: 500 }}> Expired </div>;
+    } else {
+      // Render a countdown
+      return (
+        <div style={{ fontSize: "12px", fontWeight: 500 }}> {days}:{hours}:{minutes}:{seconds} </div>
+      )
+    }
   };
 
-
-  // useEffect(()=> {
-
-  // }, [Date.now() > Number(lottery.endingtime)*1000])
- 
-  if(!lotteryData.activeLottries){
+  if (!lotteryData.activeLottries) {
     return (
-      <div style={{border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center"}}> 
-          {/* <CircularProgress size={50} sx={{color: "#fff"}} />  */}
-          No Active Lottery
+      <div style={{ border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        No Active Lottery
       </div>
     )
   }
-  
+
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
       <TableContainer sx={{ maxHeight: 350 }}>
@@ -201,84 +176,86 @@ export const LotteryTable = () => {
 
             {
               lotteryData?.activeLottries && lotteryData?.activeLottries
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((lottery: LotteryData) => (
-                <TableRow
-                  key={Number(lottery.id)}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{Number(lottery.id)}</TableCell>
-                  {/* <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ Number(ethers.utils.formatEther(lottery.priceOfTicket)) } {masterContract.erc20Symbol} </TableCell> */}
-                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ Number(lottery.priceOfTicket) } {masterContract.erc20Symbol} </TableCell>
-                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ `${Number(lottery.countOfParticipants)}/${Number(lottery.countOfTickets)}`}</TableCell>
-                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center"> <Countdown date={Number(lottery.endingtime)*1000} renderer={renderer} /> </TableCell>
-                  
-                  <TableCell align="center" >
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((lottery: LotteryData) => (
+                  <TableRow
+                    key={Number(lottery.id)}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center">{Number(lottery.id)}</TableCell>
+                    {/* <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ Number(ethers.utils.formatEther(lottery.priceOfTicket)) } {masterContract.erc20Symbol} </TableCell> */}
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center">{Number(lottery.priceOfTicket)} {masterContract.erc20Symbol} </TableCell>
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center">{`${Number(lottery.countOfParticipants)}/${Number(lottery.countOfTickets)}`}</TableCell>
+                    <TableCell sx={{ border: "0px solid black", fontSize: '10px' }} align="center"> <Countdown date={Number(lottery.endingtime) * 1000} renderer={renderer} /> </TableCell>
 
-                    {
-                      lottery.status === 0  &&  
-                      Date.now() < Number(lottery.endingtime)*1000  &&  (
-                        <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
-                          
-                          <span onClick={() => decreaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginRight: "2px" }}> - </span>
-                          
-                          <Button 
-                            variant='contained' 
-                            onClick={() => buyTicket(Number(lottery.id), lottery.count, Number(lottery.priceOfTicket)) }
-                            sx={{ 
-                              bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0 ,
-                              '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent"}
-                            }}>
-                               Buy {lottery.count}
-                          </Button>
-                          
-                          <span onClick={() => increaseCountFn(Number(lottery.id)) } style={{ cursor: "pointer", fontSize: "16px", marginLeft: "2px" }}> + </span>
-                        
-                        </div>
-                      )
-                    }
+                    <TableCell align="center" >
 
-                    {
-                      lottery.status === 0  &&  
-                      Date.now() > Number(lottery.endingtime)*1000  &&
-                      lottery.owner.toLowerCase() === userInfo.userAddress.toLowerCase()  && (
-                        <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
-                          <Button
-                            variant='contained'
-                            onClick={ () => endALottery(Number(lottery.id)) }
-                            sx={{ bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0,
-                              '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
-                            }}>
-                              END                            
-                          </Button>
-                        </div>
-                      )
+                      {
+                        lottery.status === 0 &&
+                        Date.now() < Number(lottery.endingtime) * 1000 && (
+                          <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
 
-                    }
+                            <span onClick={() => decreaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginRight: "2px" }}> - </span>
 
-{
-                      lottery.status === 1  &&  
-                      Date.now() > Number(lottery.endingtime)*1000  &&
-                      lottery.owner.toLowerCase() === userInfo.userAddress.toLowerCase()  &&
-                      
-                      (
-                        <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
-                          <Button 
-                            variant='contained' 
-                            sx={{ bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0, 
-                              '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
-                            }}>
-                              Processing             
-                          </Button>
-                        </div>
-                      )
+                            <Button
+                              variant='contained'
+                              onClick={() => buyTicket(Number(lottery.id), lottery.count, Number(lottery.priceOfTicket))}
+                              sx={{
+                                bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0,
+                                '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent" }
+                              }}>
+                              Buy {lottery.count}
+                            </Button>
 
-                    }
+                            <span onClick={() => increaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginLeft: "2px" }}> + </span>
+
+                          </div>
+                        )
+                      }
+
+                      {
+                        lottery.status === 0 &&
+                        Date.now() > Number(lottery.endingtime) * 1000 &&
+                        lottery.owner.toLowerCase() === userInfo.userAddress.toLowerCase() && (
+                          <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
+                            <Button
+                              variant='contained'
+                              onClick={() => endALottery(Number(lottery.id))}
+                              sx={{
+                                bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0,
+                                '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
+                              }}>
+                              END
+                            </Button>
+                          </div>
+                        )
+
+                      }
+
+                      {
+                        lottery.status === 1 &&
+                        Date.now() > Number(lottery.endingtime) * 1000 &&
+                        lottery.owner.toLowerCase() === userInfo.userAddress.toLowerCase() &&
+
+                        (
+                          <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
+                            <Button
+                              variant='contained'
+                              sx={{
+                                bgcolor: "#ffb409", fontSize: "8px", color: "#000", width: "30px", borderRadius: 0,
+                                '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
+                              }}>
+                              Processing
+                            </Button>
+                          </div>
+                        )
+
+                      }
 
                     </TableCell>
                   </TableRow>
                 ))
-              }
+            }
 
           </TableBody>
 

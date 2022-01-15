@@ -19,7 +19,7 @@ const config: Config = {
 ReactDOM.render(
   <React.StrictMode>
     <DAppProvider config={config}>
-      <Provider store = {store}>
+      <Provider store={store}>
         <App />
       </Provider>
     </DAppProvider>

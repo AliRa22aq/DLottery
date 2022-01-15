@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
-// import web3 from 'web3';
 
 interface MasterContract {
   lotteryAddress: string,
@@ -40,8 +39,8 @@ export interface LotteryData {
 }
 
 export interface DataType {
-  networkDetail:NetworkDetail,
-  userInfo : UserInfo,
+  networkDetail: NetworkDetail,
+  userInfo: UserInfo,
   loading: boolean,
   transectionProgress: boolean,
   masterContract: MasterContract,
@@ -49,15 +48,15 @@ export interface DataType {
     allLotteries: LotteryData[] | null,
     activeLottries: LotteryData[] | null
   }
-} 
+}
 
 
 const initialState: DataType = {
-  networkDetail : {
+  networkDetail: {
     id: 0,
     chain: "",
   },
-  userInfo : {
+  userInfo: {
     userAddress: "",
     userBalance: 0,
   },
@@ -72,12 +71,13 @@ const initialState: DataType = {
     linkBalance: null,
     ourBalance: null,
     charity: null
-  
+
   },
   lotteryData: {
-    allLotteries:  null,
+    allLotteries: null,
     activeLottries: null
-  }}
+  }
+}
 
 const dataSlice = createSlice({
   name: "Lottery",
@@ -86,13 +86,13 @@ const dataSlice = createSlice({
     clearState(state) {
       return initialState;
     },
-    
-    setActiveUserInfo(state, { payload }: PayloadAction<{address: string, balance: number, erc20Symbol: string}>) {
+
+    setActiveUserInfo(state, { payload }: PayloadAction<{ address: string, balance: number, erc20Symbol: string }>) {
       state.userInfo.userAddress = payload.address;
       state.userInfo.userBalance = payload.balance;
       state.masterContract.erc20Symbol = payload.erc20Symbol
     },
-    setActiveUser(state, { payload }: PayloadAction<string>){
+    setActiveUser(state, { payload }: PayloadAction<string>) {
       state.userInfo.userAddress = payload;
     },
     setNetworkDetails(state, { payload }: PayloadAction<NetworkDetail>) {
@@ -105,13 +105,13 @@ const dataSlice = createSlice({
     setTransactionProgress(state, { payload }: PayloadAction<boolean>) {
       state.transectionProgress = payload
     },
-    setContractMethods(state, { payload }: PayloadAction<{lotteryMethods: any, erc20Methods: any}>) {
+    setContractMethods(state, { payload }: PayloadAction<{ lotteryMethods: any, erc20Methods: any }>) {
       state.masterContract.lotteryMethods = payload.lotteryMethods
       state.masterContract.erc20Methods = payload.erc20Methods
     },
 
     addActiveLotteries(state, { payload }: PayloadAction<LotteryData>) {
-      if(state.lotteryData.activeLottries === null){
+      if (state.lotteryData.activeLottries === null) {
         state.lotteryData.activeLottries = [payload]
       }
       else {
@@ -120,7 +120,7 @@ const dataSlice = createSlice({
     },
 
     addAllLotteries(state, { payload }: PayloadAction<LotteryData>) {
-      if(state.lotteryData.allLotteries === null){
+      if (state.lotteryData.allLotteries === null) {
         state.lotteryData.allLotteries = [payload]
       }
       else {
@@ -130,7 +130,7 @@ const dataSlice = createSlice({
 
     fetchLotteryData(state, { payload }: PayloadAction<LotteryData>) {
       state.lotteryData?.activeLottries?.map((lottery) => {
-        if(Number(lottery.id) === Number(payload.id)){
+        if (Number(lottery.id) === Number(payload.id)) {
           lottery.countOfParticipants = payload.countOfParticipants;
           lottery.countOfTickets = payload.countOfTickets;
           lottery.status = payload.status
@@ -138,41 +138,41 @@ const dataSlice = createSlice({
       })
 
     },
-    
-    
-    addTickets(state, { payload }: PayloadAction<{id: number, tickets: number}>) {
-        state.lotteryData?.activeLottries?.map((lottery) => {
-          if(Number(lottery.id) === payload.id){
-            lottery.countOfTickets = Number(lottery.countOfTickets) + Number(payload.tickets);
-            lottery.countOfParticipants = Number(lottery.countOfParticipants) + 1 
-          }
-        })
+
+
+    addTickets(state, { payload }: PayloadAction<{ id: number, tickets: number }>) {
+      state.lotteryData?.activeLottries?.map((lottery) => {
+        if (Number(lottery.id) === payload.id) {
+          lottery.countOfTickets = Number(lottery.countOfTickets) + Number(payload.tickets);
+          lottery.countOfParticipants = Number(lottery.countOfParticipants) + 1
+        }
+      })
     },
 
-    
-    readLinkBalance(state, {payload}: PayloadAction<{linkBalance: number, ourBalance: number, charity: number}>){
+
+    readLinkBalance(state, { payload }: PayloadAction<{ linkBalance: number, ourBalance: number, charity: number }>) {
       state.masterContract.linkBalance = payload.linkBalance;
       state.masterContract.ourBalance = payload.ourBalance;
       state.masterContract.charity = payload.charity;
 
-      
+
     },
 
     increaseCount(state, { payload }: PayloadAction<number>) {
       // console.log("inside store")
       state.lotteryData.activeLottries && state.lotteryData.activeLottries.map((lottery) => {
-          if(Number(lottery.id) == payload && lottery.count < 10){
-            lottery.count++
-          }
-        })
+        if (Number(lottery.id) == payload && lottery.count < 10) {
+          lottery.count++
+        }
+      })
     },
-    
+
     decreaseCount(state, { payload }: PayloadAction<number>) {
       state.lotteryData.activeLottries && state.lotteryData.activeLottries.map((lottery) => {
-          if(Number(lottery.id) === payload && lottery.count > 0){
-            lottery.count--
-          }
-        })
+        if (Number(lottery.id) === payload && lottery.count > 0) {
+          lottery.count--
+        }
+      })
     },
 
 
@@ -187,6 +187,6 @@ const dataSlice = createSlice({
 // Extract the action creators object and the reducer
 const { actions, reducer } = dataSlice
 // Extract and export each action creator by name
-export const { fetchLotteryData, addTickets, setActiveUser, addAllLotteries, readLinkBalance, decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
+export const { fetchLotteryData, addTickets, setActiveUser, addAllLotteries, readLinkBalance, decreaseCount, increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
 // Export the reducer, either as a default or named export
 export default reducer

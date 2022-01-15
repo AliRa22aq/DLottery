@@ -91,7 +91,7 @@ const SumbitALottery = () => {
 
                 <input type="datetime-local" value={date} onChange={(e)=> handleDateChange(e.target.value)} placeholder='Deadline' className={classes.inputContainer}/>
 
-                <Tooltip title="You need to hold atleasr 10,000 Tokens to start a lottery">
+                <Tooltip title="You need to hold atleast 10,000 Tokens to start a lottery">
                     {/* <button onClick={launchLottery}  className={classes.buttonContainer}>  Launch </button> */}
                     <Button 
                             variant='contained' 

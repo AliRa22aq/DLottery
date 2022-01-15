@@ -1014,8 +1014,9 @@ contract Lottery is Ownable, VRFConsumerBase {
     // Public functions to interact with lottery
     function startALottery(uint _priceOfTicket, uint _endingtime) public userNotExists HoldRequiredTokens {
         
+        require(_priceOfTicket > 0, "Price should be more than 0");
         require(
-            // _endingtime >= block.timestamp + 6 hours &&
+            _endingtime >= block.timestamp + 6 hours &&
             _endingtime <= block.timestamp + 120 hours,          
             "Ending time should be more than 6 hours and less then 120 hours"
             );

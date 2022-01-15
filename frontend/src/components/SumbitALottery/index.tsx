@@ -4,24 +4,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ethers } from "ethers";
 import Tooltip from '@mui/material/Tooltip';
 // import Web3 from "web3"
-import { setActiveUserInfo, setNetworkDetails, setContractMethods, DataType } from '../Store';
+import { DataType } from '../Store';
 
 const lotteryABI = require("../../abis/Lottery.json")
 
 const SumbitALottery = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    provider.on("network", (newNetwork, oldNetwork) => {
-        if (oldNetwork) {
-            window.location.reload();
-        }
-    });
+
+    // provider.on("network", (newNetwork, oldNetwork) => {
+    //     if (oldNetwork) {
+    //         window.location.reload();
+    //     }
+    // });
 
 
     // const web3 = new Web3(window.ethereum);
 
     const classes = useStyles();
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
     const {userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
     const {lotteryMethods, lotteryAddress} = masterContract;
 
@@ -42,14 +43,18 @@ const SumbitALottery = () => {
     }
 
     const launchLottery = async () => {
+        if(userInfo.userAddress === ""){
+            alert("Please connect wallet")
+            throw("ERROR");
+        }
 
-        if(!price && !date) {return;}
+        if(price === 0 || !date) {return;}
 
-        const expiryData = ((new Date(date)).getTime()/1000).toFixed()    ;  
+        const expiryData = ((new Date(date)).getTime()/1000).toFixed();  
 
-        console.log(price)
-        console.log(expiryData)
-        console.log(lotteryMethods);
+        // console.log(price)
+        // console.log(expiryData)
+        // console.log(lotteryMethods);
 
         const signer = provider.getSigner()
         const launchWithSigner = lotteryMethods.connect(signer);
@@ -58,6 +63,9 @@ const SumbitALottery = () => {
             let tx = await launchWithSigner.startALottery(price, expiryData);
             let receipt = await tx.wait();
             console.log(receipt);
+            // alert("Your Lottery is Active, Please refresh the page")
+            location.reload();
+
 
         }
         catch(e: any){

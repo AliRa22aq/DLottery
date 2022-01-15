@@ -5,13 +5,24 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './components/Store/store'
+import { Mainnet, DAppProvider, useEtherBalance, useEthers, Config } from '@usedapp/core'
+
+const config: Config = {
+  // readOnlyChainId: Mainnet.chainId,
+  // readOnlyUrls: {
+  //   [Mainnet.chainId]: 'https://mainnet.infura.io/v3/62687d1a985d4508b2b7a24827551934',
+  // },
+}
+
 
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store = {store}>
-      <App />
-    </Provider>
+    <DAppProvider config={config}>
+      <Provider store = {store}>
+        <App />
+      </Provider>
+    </DAppProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

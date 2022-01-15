@@ -1,5 +1,3 @@
-
-
 import React, {useEffect} from 'react'
 import { makeStyles } from '@mui/styles';
 import { LotteryTable } from './LotteryTable';
@@ -8,7 +6,7 @@ import { ethers } from "ethers";
 import { useDispatch, useSelector } from 'react-redux';
 import { addAllLotteries, readLinkBalance, LotteryData, DataType, addActiveLotteries } from '../Store';
 const LotteryABI = require("../../abis/Lottery.json") 
-const ERC20ABI = require("../../abis/TestCoin.json") 
+// const ERC20ABI = require("../../abis/TestCoin.json") 
 
 
 const LotteryResults = () => {
@@ -16,31 +14,26 @@ const LotteryResults = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
     const dispatch = useDispatch();
-    const {lotteryData, userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
-
+    const {masterContract} = useSelector((state: DataType) => state);
 
     useEffect(() => {
-
-        const fetchData = async () => {       
-                
-                const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
-                console.log(lotteryContract)
-
-                const counts = await lotteryContract.lotteriesCount();
-                console.log("All Lotteries Count", Number(counts))
-                        
-                for(let i = Number(counts); i > 0; i--){
-                    let lotteryInformation = await lotteryContract.lotteryInfo(i);
-                    console.log("All LotteryResults", lotteryInformation)
-                    dispatch(addAllLotteries(lotteryInformation))         
-                }
-        
-        }
-        
-        fetchData();
-
+        fetchAllLotteriesData();        
     }, [])
+    
+    const fetchAllLotteriesData = async () => {       
 
+            const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
+            const counts = await lotteryContract.lotteriesCount();
+            // console.log(lotteryContract)
+            // console.log("All Lotteries Count", Number(counts))
+                    
+            for(let i = Number(counts); i > 0; i--){
+                let lotteryInformation = await lotteryContract.lotteryInfo(i);
+                dispatch(addAllLotteries(lotteryInformation))
+                // console.log("All LotteryResults", lotteryInformation)
+            }
+    
+    }
 
  
     return (
@@ -51,11 +44,6 @@ const LotteryResults = () => {
                 <div className={classes.headerText}>
                   Draw Results
                 </div>
-
-                {/* <div className={classes.toggleButtonsContainer}>
-                    <ToggleButtons text1='Active' text2='All' />
-                </div> */}
-
 
             </div>
 
@@ -70,8 +58,6 @@ const LotteryResults = () => {
 export default LotteryResults
 
 const useStyles = makeStyles({
-
-    
     UpcomingLotteriesContainer: {
     //   border: "1px solid black",
         width: "45%",

@@ -10,12 +10,13 @@ import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { decreaseCount ,increaseCount, LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { addTickets, decreaseCount ,increaseCount, LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
 import { useDispatch, useSelector } from 'react-redux';
 // import moment from 'moment';
 import Countdown from "react-countdown";
 import CircularProgress from '@mui/material/CircularProgress';
 import { ethers } from "ethers";
+const LotteryABI = require("../../abis/Lottery.json") 
 
 interface Column {
   id: 'id' | 'price' | 'time' | 'contributions' | 'funds' | 'button';
@@ -119,15 +120,15 @@ export const LotteryTable = () => {
 
   const {lotteryData, userInfo, masterContract} = useSelector((state: DataType) => state);
 
-  console.log("userInfo", userInfo);
-  console.log("userInfo lotteryData", lotteryData);
+  // console.log("userInfo", userInfo);
+  // console.log("userInfo lotteryData", lotteryData);
 
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const increaseCountFn = (id: number) => {
-    console.log("increaseCount", id)
+    // console.log("increaseCount", id)
     dispatch(increaseCount(id))
     // dispatch(addActiveLotteries(newInfo))
 
@@ -138,7 +139,19 @@ export const LotteryTable = () => {
   }
 
   const buyTicket = async (id:number, count: number, price:number) => {
+    
+    if(userInfo.userAddress === ""){
+      alert("Please connect wallet")
+      throw("ERROR");
+    }
+
     const totalCost = count*price;
+
+    if(userInfo.userBalance < totalCost){
+      alert("Not Enough balance")
+      throw("ERROR");
+    }
+
     const res = window.confirm(`Approve ${totalCost} OURs for ${count} tickets`)
     if(res){
       const signer = provider.getSigner()
@@ -153,7 +166,8 @@ export const LotteryTable = () => {
         const tx2 = await buy.buyATicket(id, count);
         let receipt2 = await tx2.wait();
         console.log(receipt2);
-        location.reload();
+        dispatch(addTickets({id: id, tickets: count}))
+        // location.reload();
 
 
 
@@ -182,7 +196,7 @@ export const LotteryTable = () => {
       let receipt1 = await tx1.wait();
       console.log(receipt1);
       location.reload();
-
+      
     }
     catch(e){
       console.log(e)
@@ -212,6 +226,7 @@ export const LotteryTable = () => {
           )
       }
   };
+
 
  
   if(!lotteryData.activeLottries){
@@ -252,10 +267,11 @@ export const LotteryTable = () => {
                   key={Number(lottery.id)}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell align="center">{Number(lottery.id)}</TableCell>
-                  <TableCell align="center">{Number(lottery.priceOfTicket)}</TableCell>
-                  <TableCell align="center">{ `${Number(lottery.countOfParticipants)}/${Number(lottery.countOfTickets)}`}</TableCell>
-                  <TableCell align="center"> <Countdown date={Number(lottery.endingtime)*1000} renderer={renderer} /> </TableCell>
+                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{Number(lottery.id)}</TableCell>
+                  {/* <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ Number(ethers.utils.formatEther(lottery.priceOfTicket)) } {masterContract.erc20Symbol} </TableCell> */}
+                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ Number(lottery.priceOfTicket) } {masterContract.erc20Symbol} </TableCell>
+                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center">{ `${Number(lottery.countOfParticipants)}/${Number(lottery.countOfTickets)}`}</TableCell>
+                  <TableCell sx={{ border: "0px solid black", fontSize: '10px'}} align="center"> <Countdown date={Number(lottery.endingtime)*1000} renderer={renderer} /> </TableCell>
                   
                   <TableCell align="center" >
 

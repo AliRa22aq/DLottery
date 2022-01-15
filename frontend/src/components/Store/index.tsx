@@ -25,8 +25,8 @@ interface UserInfo {
 export interface LotteryData {
   id: BigNumber;
   accumulatedFunds: BigNumber;
-  countOfParticipants: BigNumber;
-  countOfTickets: BigNumber;
+  countOfParticipants: BigNumber | Number;
+  countOfTickets: BigNumber | Number;
   endingtime: BigNumber;
   owner: string;
   ownerCommision: BigNumber;
@@ -124,6 +124,16 @@ const dataSlice = createSlice({
       }
     },
     
+    addTickets(state, { payload }: PayloadAction<{id: number, tickets: number}>) {
+        state.lotteryData?.activeLottries?.map((lottery) => {
+          if(Number(lottery.id) === payload.id){
+            lottery.countOfTickets = Number(lottery.countOfTickets) + Number(payload.tickets);
+            lottery.countOfParticipants = Number(lottery.countOfParticipants) + 1 
+          }
+        })
+    },
+
+    
     readLinkBalance(state, {payload}: PayloadAction<{linkBalance: number, ourBalance: number}>){
       state.masterContract.linkBalance = payload.linkBalance;
       state.masterContract.ourBalance = payload.ourBalance;
@@ -158,6 +168,6 @@ const dataSlice = createSlice({
 // Extract the action creators object and the reducer
 const { actions, reducer } = dataSlice
 // Extract and export each action creator by name
-export const { setActiveUser, addAllLotteries, readLinkBalance, decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
+export const { addTickets, setActiveUser, addAllLotteries, readLinkBalance, decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
 // Export the reducer, either as a default or named export
 export default reducer

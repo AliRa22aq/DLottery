@@ -47,22 +47,40 @@ const Footer = () => {
           >
 
 <DialogContent>
-          <DialogContentText>
-            Disclaimer
-          </DialogContentText>
           <Box
             noValidate
             component="form"
             sx={{
-              
-              display: 'flex',
-              flexDirection: 'column',
-              m: 'auto',
+              // display: 'flex',
+              // flexDirection: 'column',
+              // m: 'auto',
               width: '500px',
             }}
           >
+          <DialogContentText sx={{display: "flex", justifyContent: "center", margin: "20px", color: "red"}}>
+            Disclaimer
+          </DialogContentText>
+            <ul>
+              <li style={{marginBottom: "10px"}}> 
+                Official drawing results used in the validation and payment of winning tickets are done through VRF Chainlink and are
+                recorded on the blockchain. 
+              </li>
+              
+              <li style={{marginBottom: "10px"}}> 
+                BeDecent Lottery has been audited by an independent auditing firm. In the case of a discrepancy
+                between the information provided in this publication and the official drawing results, the official drawing
+                results shall prevail.
+              </li>
 
-            Hello 
+              <li style={{marginBottom: "10px"}}>
+                While every effort is made to ensure its accuracy, the information provided in this contract is
+                official but we are trying to make it more stable so use it moderately may contain errors. 
+              </li>
+            </ul>
+            
+
+            
+
           </Box>
         </DialogContent>
 

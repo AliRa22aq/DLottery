@@ -8,15 +8,13 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { addTickets, decreaseCount ,increaseCount, LotteryData, DataType, addActiveLotteries, setActiveUserInfo, setNetworkDetails, setContractMethods } from '../Store';
+import { fetchLotteryData, addTickets, decreaseCount ,increaseCount, LotteryData, DataType} from '../Store';
 import { useDispatch, useSelector } from 'react-redux';
 // import moment from 'moment';
 import Countdown from "react-countdown";
-import CircularProgress from '@mui/material/CircularProgress';
+// import CircularProgress from '@mui/material/CircularProgress';
 import { ethers } from "ethers";
-const LotteryABI = require("../../abis/Lottery.json") 
+// const LotteryABI = require("../../abis/Lottery.json") 
 
 interface Column {
   id: 'id' | 'price' | 'time' | 'contributions' | 'funds' | 'button';
@@ -47,72 +45,12 @@ let columns: readonly Column[] = [
 
 ];
 
-// interface Data {
-//   id: number;
-//   price: number;
-//   status: "In Progress" |"Expired"|"Pending";
-//   time: number;
-//   count: number;
-// }
-
-// let data = [
-//   {
-//     id: 1,
-//     price: "100",
-//     status: "In Progress",
-//     time: 123456789,
-//     count: 1
-//   },
-//   {
-//     id: 2,
-//     price: "100",
-//     status: "In Progress",
-//     time: 123456789,
-//     count: 1
-//   },
-//   {
-//     id: 3,
-//     price: "100",
-//     status: "Pending",
-//     time: 123456789,
-//     count: 1
-//   },
-//   {
-//     id: 4,
-//     price: "100",
-//     status: "Expired",
-//     time: 123456789,
-//     count: 1
-//   },
-//   {
-//     id: 5,
-//     price: "100",
-//     status: "In Progress",
-//     time: 123456789,
-//     count: 1
-//   },
-//   {
-//     id: 6,
-//     price: "100",
-//     status: "Expired",
-//     time: 123456789,
-//     count: 1
-//   },
-//   {
-//     id: 7,
-//     price: "100",
-//     status: "In Progress",
-//     time: 123456789,
-//     count: 1
-//   },
-
-// ];
 
 
 export const LotteryTable = () => {
 
-  const currentTime = Date.now();
-  console.log("currentTime ", currentTime)
+  // const currentTime = Date.now();
+  // console.log("currentTime ", currentTime)
   
   const provider = new ethers.providers.Web3Provider(window.ethereum);
 
@@ -120,12 +58,11 @@ export const LotteryTable = () => {
 
   const {lotteryData, userInfo, masterContract} = useSelector((state: DataType) => state);
 
-  // console.log("userInfo", userInfo);
-  // console.log("userInfo lotteryData", lotteryData);
 
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
 
   const increaseCountFn = (id: number) => {
     // console.log("increaseCount", id)
@@ -161,15 +98,15 @@ export const LotteryTable = () => {
       try{
         const tx1 = await approveTokens.approve(masterContract.lotteryAddress, totalCost);
         let receipt1 = await tx1.wait();
-        console.log(receipt1);
+        // console.log(receipt1);
 
         const tx2 = await buy.buyATicket(id, count);
         let receipt2 = await tx2.wait();
-        console.log(receipt2);
-        dispatch(addTickets({id: id, tickets: count}))
-        // location.reload();
+        // console.log(receipt2);
 
-
+        const refreshedLotteryData = await  masterContract.lotteryMethods.lotteryInfo(id)
+        // console.log(refreshedLotteryData)
+        dispatch(fetchLotteryData(refreshedLotteryData));
 
       }
       catch(e){
@@ -180,7 +117,7 @@ export const LotteryTable = () => {
 
   }
 
-  const endALottery = async () => {
+  const endALottery = async (id: number) => {
 
     console.log(masterContract.linkBalance)
 
@@ -194,15 +131,15 @@ export const LotteryTable = () => {
     try{
       const tx1 = await end.endALottery();
       let receipt1 = await tx1.wait();
-      console.log(receipt1);
-      location.reload();
-      
+      // console.log(receipt1);
+      // location.reload();
+      const refreshedLotteryData = await  masterContract.lotteryMethods.lotteryInfo(id)
+      // console.log(refreshedLotteryData)
+      dispatch(fetchLotteryData(refreshedLotteryData));
     }
     catch(e){
       console.log(e)
     }
-
-
     
   }
 
@@ -228,6 +165,9 @@ export const LotteryTable = () => {
   };
 
 
+  // useEffect(()=> {
+
+  // }, [Date.now() > Number(lottery.endingtime)*1000])
  
   if(!lotteryData.activeLottries){
     return (
@@ -277,7 +217,7 @@ export const LotteryTable = () => {
 
                     {
                       lottery.status === 0  &&  
-                      currentTime < Number(lottery.endingtime)*1000  &&  (
+                      Date.now() < Number(lottery.endingtime)*1000  &&  (
                         <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
                           
                           <span onClick={() => decreaseCountFn(Number(lottery.id))} style={{ cursor: "pointer", fontSize: "16px", marginRight: "2px" }}> - </span>
@@ -300,13 +240,13 @@ export const LotteryTable = () => {
 
                     {
                       lottery.status === 0  &&  
-                      currentTime > Number(lottery.endingtime)*1000  &&
+                      Date.now() > Number(lottery.endingtime)*1000  &&
                       lottery.owner.toLowerCase() === userInfo.userAddress.toLowerCase()  && (
                         <div style={{display: "flex", justifyContent: "space-evenly", alignItems: "center"}}>
-                          <Button 
-                            variant='contained' 
-                            onClick={endALottery}
-                            sx={{ bgcolor: "#ff6565", fontSize: "8px", width: "30px", borderRadius: 0, 
+                          <Button
+                            variant='contained'
+                            onClick={ () => endALottery(Number(lottery.id)) }
+                            sx={{ bgcolor: "#ff6565", fontSize: "8px", width: "30px", borderRadius: 0,
                               '&:hover': { bgcolor: "#737473", color: "#fff", borderColor: "transparent", }
                             }}>
                               END                            
@@ -318,7 +258,7 @@ export const LotteryTable = () => {
 
 {
                       lottery.status === 1  &&  
-                      currentTime > Number(lottery.endingtime)*1000  &&
+                      Date.now() > Number(lottery.endingtime)*1000  &&
                       lottery.owner.toLowerCase() === userInfo.userAddress.toLowerCase()  &&
                       
                       (

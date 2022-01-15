@@ -78,7 +78,14 @@ const SumbitALottery = () => {
         <div className={classes.submitContainer}>
             
             <div className={classes.submitElement1}>
-                <input type="number" value={price} onChange={(e)=> handlePriceChange(e.target.value)} placeholder='Price' className={classes.inputContainer}/>
+                <input 
+                    type="number" 
+                    value={price} 
+                    onChange={(e)=> handlePriceChange(e.target.value)} 
+                    placeholder="hello"
+                    className={classes.inputContainer}
+                    />
+
                 <input type="datetime-local" value={date} onChange={(e)=> handleDateChange(e.target.value)} placeholder='Deadline' className={classes.inputContainer}/>
 
                 <Tooltip title="You need to hold atleasr 10,000 Tokens to start a lottery">

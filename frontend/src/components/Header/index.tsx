@@ -18,6 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
+import Badge from '@mui/material/Badge';
 
 
 import { useEthers } from "@usedapp/core";
@@ -40,18 +41,14 @@ const Header = () => {
     const {userInfo, networkDetail, masterContract} = useSelector((state: DataType) => state);
 
     const {  account, activateBrowserWallet, deactivate } = useEthers();
-    console.log("account", account)
+    // console.log("account", account)
 
 
     const isConnected = account !== undefined;
     
     
     useEffect(()=> {
-        // if(isConnected && account){
-        //     dispatch(setActiveUser(account))
-        // }
         getBlockChainData();
-        // ConnectWallet();
     }, [userInfo.userAddress, account])
 
     const getBlockChainData = async () => {
@@ -81,48 +78,7 @@ const Header = () => {
             const balance = await erc20Contract.balanceOf(account);            
             dispatch(setActiveUserInfo({address: account, balance: Number(balance), erc20Symbol: symbol}));
         }
-
-
     }
-
-    // const ConnectWallet = async () => {
-
-    //     // const signer = provider.getSigner()
-    //     // await provider.send("eth_requestAccounts", []);
-    //     // const account = await signer.getAddress();
-    //     // console.log(account)
-
-    //     // const lotteryContract = new ethers.Contract(masterContract.lotteryAddress , LotteryABI.abi , provider)
-        
-    //     // const erc20Contract = new ethers.Contract(masterContract.erc20Address , ERC20ABI.abi , provider)
-        
-    //     // const name = await erc20Contract.name();
-    //     // console.log(name)
-        
-    //     // const symbol = await erc20Contract.symbol();
-    //     // console.log(symbol)
-
-    //     // const balance = await erc20Contract.balanceOf(account);
-    //     // console.log(Number(balance))
-        
-    //     // dispatch(setActiveUserInfo({address: account, balance: Number(balance), erc20Symbol: symbol}));
-            
-
-    
-    // }
-    
-    // const ConnectWallet = async () => {
-
-    //     console.log("ConnectWallet")
-        
-    //     const erc20Contract = new ethers.Contract(masterContract.erc20Address , ERC20ABI.abi , provider)          
-    //     const symbol = await erc20Contract.symbol();
-    //     const balance = await erc20Contract.balanceOf(account);            
-    //     dispatch(setActiveUserInfo({address: account ? account:"", balance: Number(balance), erc20Symbol: symbol}));
-
-    // }
-
-
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -134,7 +90,6 @@ const Header = () => {
       setAnchorEl(null);
     };
   
-
     return (
         <div className={classes.headerContainer}>
 
@@ -157,10 +112,12 @@ const Header = () => {
                     <MenuItem onClick={handleClose}>JACKPOT</MenuItem>
                     <MenuItem onClick={handleClose}>LIFETIME </MenuItem>
                     <Divider />
+
                     <MenuItem onClick={handleClose}>Whitepaper</MenuItem>
                     <MenuItem onClick={handleClose}>Social Links</MenuItem>
                     <MenuItem onClick={handleClose}>Audit Reports</MenuItem>
                     <Divider />
+                    
                     <MenuItem onClick={handleClose}>LINK balance: {masterContract.linkBalance}</MenuItem>
                     <MenuItem onClick={handleClose}>Our balance: {masterContract.ourBalance}</MenuItem>
 

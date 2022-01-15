@@ -107,6 +107,7 @@ const dataSlice = createSlice({
       state.masterContract.lotteryMethods = payload.lotteryMethods
       state.masterContract.erc20Methods = payload.erc20Methods
     },
+
     addActiveLotteries(state, { payload }: PayloadAction<LotteryData>) {
       if(state.lotteryData.activeLottries === null){
         state.lotteryData.activeLottries = [payload]
@@ -115,6 +116,7 @@ const dataSlice = createSlice({
         state.lotteryData.activeLottries.push(payload)
       }
     },
+
     addAllLotteries(state, { payload }: PayloadAction<LotteryData>) {
       if(state.lotteryData.allLotteries === null){
         state.lotteryData.allLotteries = [payload]
@@ -123,6 +125,18 @@ const dataSlice = createSlice({
         state.lotteryData.allLotteries.push(payload)
       }
     },
+
+    fetchLotteryData(state, { payload }: PayloadAction<LotteryData>) {
+      state.lotteryData?.activeLottries?.map((lottery) => {
+        if(Number(lottery.id) === Number(payload.id)){
+          lottery.countOfParticipants = payload.countOfParticipants;
+          lottery.countOfTickets = payload.countOfTickets;
+          lottery.status = payload.status
+        }
+      })
+
+    },
+    
     
     addTickets(state, { payload }: PayloadAction<{id: number, tickets: number}>) {
         state.lotteryData?.activeLottries?.map((lottery) => {
@@ -168,6 +182,6 @@ const dataSlice = createSlice({
 // Extract the action creators object and the reducer
 const { actions, reducer } = dataSlice
 // Extract and export each action creator by name
-export const { addTickets, setActiveUser, addAllLotteries, readLinkBalance, decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
+export const { fetchLotteryData, addTickets, setActiveUser, addAllLotteries, readLinkBalance, decreaseCount ,increaseCount, addActiveLotteries, setContractMethods, clearState, setActiveUserInfo, setNetworkDetails, setLoading, setTransactionProgress } = actions
 // Export the reducer, either as a default or named export
 export default reducer

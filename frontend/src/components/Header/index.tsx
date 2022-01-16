@@ -58,8 +58,8 @@ const Header = () => {
         dispatch(setContractMethods({ lotteryMethods: lotteryContract, erc20Methods: erc20Contract }))
 
         const network = await provider.getNetwork()
-        if (Number(network.chainId) !== 97) {
-            alert("Please connect to Binance Test net to use this Dapp")
+        if (Number(network.chainId) !== 56) {
+            alert("Please connect to Binance Smart Chain Mainnetwork to use this Dapp")
         }
 
         dispatch(setNetworkDetails({ id: Number(network.chainId), chain: getChainName(Number(network.chainId)) }));

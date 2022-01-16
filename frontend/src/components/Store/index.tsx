@@ -63,9 +63,9 @@ const initialState: DataType = {
   loading: false,
   transectionProgress: false,
   masterContract: {
-    lotteryAddress: "0xea8f7250a0153d54Aa30fdA25c3610efD5182C01",
+    lotteryAddress: "0x52Ca0ddFf1552c413FB8D801663034a876980032",
     lotteryMethods: null,
-    erc20Address: "0x78D85b6CA607e628f2981198EDF0f28E7A571E5f",
+    erc20Address: "0xfd189f9b7f2b1924caac3022a3d32b0d2e0fc540",
     erc20Symbol: "",
     erc20Methods: null,
     linkBalance: null,

@@ -45,20 +45,22 @@ export const LotteryTable = () => {
     setPage(0);
   };
 
-  if (!lotteryData.allLotteries) {
-    return (
-      <div style={{ border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}> <CircularProgress size={50} sx={{ color: "#fff" }} /> </div>
-    )
-  }
-
+  
   const drawExists = lotteryData?.allLotteries?.some((lottery) => Number(lottery.status) === 2);
-
+  
   if (!drawExists) {
     return (
-      <div>No Draw Result Exists </div>
-    )
-  }
-
+      <div style={{ border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        No Draw Result Exists 
+      </div>
+      )
+    }
+    
+    if (!lotteryData.allLotteries) {
+      return (
+        <div style={{ border: "0px solid black", height: "400px", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}> <CircularProgress size={50} sx={{ color: "#fff" }} /> </div>
+      )
+    }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>

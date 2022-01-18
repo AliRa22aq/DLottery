@@ -111,11 +111,11 @@ const Header = () => {
                 MenuListProps={{ 'aria-labelledby': 'basic-button' }}
             >
                 <Link href="/" sx={{ textDecoration: "none", color: "#000" }} >
-                    <MenuItem onClick={handleClose}>ANONYMOUS</MenuItem>
+                    <MenuItem onClick={handleClose}>Anonymous Lottery</MenuItem>
                 </Link>
 
-                <MenuItem> JACKPOT  <span style={{ color: "#ff0000", marginLeft: "5px" }}> (coming soon) </span> </MenuItem>
-                <MenuItem> LIFETIME <span style={{ color: "#ff0000", marginLeft: "5px" }}> (coming soon) </span> </MenuItem>
+                <MenuItem> Jackpot Lottery <span style={{ color: "#ff0000", marginLeft: "5px" }}> (coming soon) </span> </MenuItem>
+                <MenuItem> Lifetime Lottery <span style={{ color: "#ff0000", marginLeft: "5px" }}> (coming soon) </span> </MenuItem>
                 <Divider />
 
                 <Link
@@ -159,7 +159,7 @@ const Header = () => {
                 </Link>
 
                 <Link
-                    href="https://t.me/+XzZEgDhlmKA3OWM1"
+                    href="https://t.me/bedecent"
                     target='_blank'
                     sx={{ textDecoration: "none", color: "#000" }}
                 >

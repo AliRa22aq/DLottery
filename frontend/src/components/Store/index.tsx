@@ -30,8 +30,8 @@ export interface LotteryData {
   endingtime: BigNumber;
   owner: string;
   ownerCommision: BigNumber;
-  priceOfTicket: BigNumber;
-  prize: BigNumber;
+  priceOfTicket: BigNumber | Number;
+  prize: BigNumber | Number;
   status: number
   winner: string;
   winnerIndex: BigNumber;
@@ -63,9 +63,9 @@ const initialState: DataType = {
   loading: false,
   transectionProgress: false,
   masterContract: {
-    lotteryAddress: "0x52Ca0ddFf1552c413FB8D801663034a876980032",
+    lotteryAddress: "0xE6d180D2e94387D1dF0A756D063abB9a9484F781",
     lotteryMethods: null,
-    erc20Address: "0xfd189f9b7f2b1924caac3022a3d32b0d2e0fc540",
+    erc20Address: "0x9048ca15c06FD7E3353EC6DD11464a9c7C6461B3",
     erc20Symbol: "",
     erc20Methods: null,
     linkBalance: null,

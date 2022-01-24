@@ -10,26 +10,37 @@ import { DataType } from '../Store';
 
 const SumbitALottery = () => {
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const classes = useStyles();
     const { userInfo, masterContract } = useSelector((state: DataType) => state);
-    const { lotteryMethods } = masterContract;
-
+    const { lotteryMethods, erc20Symbol } = masterContract;
+    
     const [price, setPrice] = useState<number>(0);
-
+    
     const [date, setDate] = useState<number>((new Date).getTime());
-
+    
     const handlePriceChange = (e: any) => {
         // console.log(e)
         setPrice(e)
     }
-
+    
     const handleDateChange = (e: any) => {
         // console.log( (new Date(e)).getTime())
         setDate(e)
     }
-
+    
     const launchLottery = async () => {
+        let provider
+        
+        try{
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+        }
+        catch(e){
+            // console.log(e)
+            throw("No provider available")
+        }
+
+        
+        
         if (userInfo.userAddress === "") {
             alert("Please connect wallet")
             throw ("ERROR");
@@ -37,12 +48,15 @@ const SumbitALottery = () => {
 
         if (price === 0 || !date) { return; }
 
+        const priceInWei = ethers.utils.parseEther(String(price))
+        console.log("priceInWei", priceInWei)
+
         const expiryData = ((new Date(date)).getTime() / 1000).toFixed();
         const signer = provider.getSigner()
         const launchWithSigner = lotteryMethods.connect(signer);
 
         try {
-            let tx = await launchWithSigner.startALottery(price, expiryData);
+            let tx = await launchWithSigner.startALottery(priceInWei, expiryData);
             let receipt = await tx.wait();
             console.log(receipt);
             location.reload();
@@ -61,13 +75,13 @@ const SumbitALottery = () => {
                     type="number"
                     value={price}
                     onChange={(e) => handlePriceChange(e.target.value)}
-                    placeholder="hello"
+                    placeholder="Ticket Price"
                     className={classes.inputContainer}
                 />
 
                 <input type="datetime-local" value={date} onChange={(e) => handleDateChange(e.target.value)} placeholder='Deadline' className={classes.inputContainer} />
 
-                <Tooltip title="You need to hold atleast 10,000 Tokens to start a lottery">
+                <Tooltip title={`You need to hold atleast 10,000 ${erc20Symbol} Tokens to start a lottery`} >
                     {/* <button onClick={launchLottery}  className={classes.buttonContainer}>  Launch </button> */}
                     <Button
                         variant='contained'

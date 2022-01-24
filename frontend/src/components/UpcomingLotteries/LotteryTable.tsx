@@ -46,7 +46,6 @@ let columns: readonly Column[] = [
 
 export const LotteryTable = () => {
 
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
   const dispatch = useDispatch();
   const { lotteryData, userInfo, masterContract } = useSelector((state: DataType) => state);
   const [page, setPage] = useState(0);
@@ -62,6 +61,7 @@ export const LotteryTable = () => {
   }
 
   const buyTicket = async (id: number, count: number, price: number) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     if (userInfo.userAddress === "") {
       alert("Please connect wallet")
@@ -102,6 +102,7 @@ export const LotteryTable = () => {
   }
 
   const endALottery = async (id: number) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     console.log(masterContract.linkBalance)
 

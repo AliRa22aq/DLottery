@@ -21,30 +21,53 @@ import Link from '@mui/material/Link';
 
 
 import { useEthers } from "@usedapp/core";
-
+import MetaMaskOnboarding from '@metamask/onboarding'
+// import Web3 from "web3";
 
 const LotteryABI = require("../../abis/Lottery.json")
 const ERC20ABI = require("../../abis/TestCoin.json")
 
 
 
+window.ethereum && window.ethereum.on('accountsChanged', function (accounts: any) {
+    console.log("accountsChanged")
+    location.reload();
+    // dispatch(setActiveUser(accounts[0]))
+})
+
+window.ethereum && window.ethereum.on('chainChanged', function (accounts: any) {
+    location.reload();
+})
+
 const Header = () => {
 
-    window.ethereum.on('accountsChanged', function (accounts: any) {
-        dispatch(setActiveUser(accounts[0]))
-    })
-
-    window.ethereum.on('chainChanged', function (accounts: any) {
-        location.reload();
-    })
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const classes = useStyles();
     const dispatch = useDispatch();
-    const { userInfo, networkDetail, masterContract } = useSelector((state: DataType) => state);
+    const { userInfo, masterContract } = useSelector((state: DataType) => state);
 
     const { account, activateBrowserWallet, deactivate } = useEthers();
     const isConnected = account !== undefined;
+
+
+    const connectMetamask = async () => {
+        const isMetaMaskAvaialble = MetaMaskOnboarding.isMetaMaskInstalled()
+        if (!isMetaMaskAvaialble) {
+
+            // console.log("Onbording start")
+            const askToInstall = confirm("No metamask Found. please install it")
+            // console.log("askToInstall ", askToInstall)
+            if (askToInstall) {
+                const onboarding = new MetaMaskOnboarding();
+                onboarding.startOnboarding()
+            }
+        }
+
+        if (isMetaMaskAvaialble) {
+            activateBrowserWallet()
+
+        }
+
+    }
 
 
     useEffect(() => {
@@ -53,33 +76,59 @@ const Header = () => {
 
     const getBlockChainData = async () => {
 
-        const lotteryContract = new ethers.Contract(masterContract.lotteryAddress, LotteryABI.abi, provider)
-        const erc20Contract = new ethers.Contract(masterContract.erc20Address, ERC20ABI.abi, provider)
-        dispatch(setContractMethods({ lotteryMethods: lotteryContract, erc20Methods: erc20Contract }))
+        const isMetaMaskAvaialble = MetaMaskOnboarding.isMetaMaskInstalled()
 
-        const network = await provider.getNetwork()
-        if (Number(network.chainId) !== 56) {
-            alert("Please connect to Binance Smart Chain Mainnetwork to use this Dapp")
+        // console.log("isMetaMaskAvaialble", isMetaMaskAvaialble)
+
+        if (!isMetaMaskAvaialble) {
+
+            // console.log("Onbording start")
+            const askToInstall = confirm("No metamask Found. please install it")
+            // console.log("askToInstall ", askToInstall)
+            if (askToInstall) {
+                const onboarding = new MetaMaskOnboarding();
+                onboarding.startOnboarding()
+            }
         }
 
-        dispatch(setNetworkDetails({ id: Number(network.chainId), chain: getChainName(Number(network.chainId)) }));
+        if (isMetaMaskAvaialble) {
 
-        const linkBalance = await lotteryContract.linkBalance();
-        const ourBalance = await await erc20Contract.balanceOf(masterContract.lotteryAddress);
-        const charity = await await lotteryContract.charityBalance();
+            let provider = new ethers.providers.Web3Provider(window.ethereum);
 
-        dispatch(readLinkBalance({
-            linkBalance: Number(ethers.utils.formatEther(linkBalance)),
-            ourBalance: Number(ethers.utils.formatEther(ourBalance)),
-            charity: Number(charity)
-        }))
+            const lotteryContract = new ethers.Contract(masterContract.lotteryAddress, LotteryABI.abi, provider)
+            const erc20Contract = new ethers.Contract(masterContract.erc20Address, ERC20ABI.abi, provider)
 
-        const symbol = await erc20Contract.symbol();
+            dispatch(setContractMethods({ lotteryMethods: lotteryContract, erc20Methods: erc20Contract }))
 
-        if (account) {
-            const balance = await erc20Contract.balanceOf(account);
-            dispatch(setActiveUserInfo({ address: account, balance: Number(balance), erc20Symbol: symbol }));
+            const network = await provider.getNetwork()
+            // console.log(Number(network.chainId))
+            if (Number(network.chainId) !== 79) {
+                alert("Please connect to Binance Smart Chain Testnetwork to use this Dapp")
+            }
+
+            dispatch(setNetworkDetails({ id: Number(network.chainId), chain: getChainName(Number(network.chainId)) }));
+
+            const linkBalance = await lotteryContract.linkBalance();
+            const ourBalance = await erc20Contract.balanceOf(masterContract.lotteryAddress);
+            const charity = await lotteryContract.charityBalance();
+
+            dispatch(readLinkBalance({
+                linkBalance: Number(ethers.utils.formatEther(linkBalance)),
+                ourBalance: Number(ethers.utils.formatEther(ourBalance)),
+                charity: Number(charity)
+            }))
+
+            const symbol = await erc20Contract.symbol();
+
+            if (account) {
+                let balance = await erc20Contract.balanceOf(account);
+                balance = Number(ethers.utils.formatEther(balance));
+                dispatch(setActiveUserInfo({ address: account, balance: Number(balance), erc20Symbol: symbol }));
+            }
+
         }
+
+
     }
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -200,7 +249,7 @@ const Header = () => {
                         </Button>
                     ) : (
                         <Button sx={{ color: "#fff", fontSize: "16px", fontWeight: "500" }}
-                            onClick={() => activateBrowserWallet()}>
+                            onClick={connectMetamask}>
                             <img
                                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/800px-MetaMask_Fox.svg.png"
                                 alt="metamask"

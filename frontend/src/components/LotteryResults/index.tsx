@@ -3,29 +3,54 @@ import { makeStyles } from '@mui/styles';
 import { LotteryTable } from './LotteryTable';
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from 'react-redux';
-import { addAllLotteries, DataType } from '../Store';
+import { addAllLotteries, DataType, LotteryData } from '../Store';
 const LotteryABI = require("../../abis/Lottery.json")
 // const ERC20ABI = require("../../abis/TestCoin.json") 
 
 
 const LotteryResults = () => {
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const classes = useStyles();
     const dispatch = useDispatch();
     const { masterContract } = useSelector((state: DataType) => state);
-
+    
     useEffect(() => {
         fetchAllLotteriesData();
     }, [])
-
+    
     const fetchAllLotteriesData = async () => {
+        
+        let provider
+        
+        try{
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+        }
+        catch(e){
+            // console.log(e)
+            throw("No provider available")
+        }
+
 
         const lotteryContract = new ethers.Contract(masterContract.lotteryAddress, LotteryABI.abi, provider)
         const counts = await lotteryContract.lotteriesCount();
 
         for (let i = Number(counts); i > 0; i--) {
             let lotteryInformation = await lotteryContract.lotteryInfo(i);
+            const lotteryData: LotteryData = {
+                id: lotteryInformation.id,
+                accumulatedFunds: lotteryInformation.accumulatedFunds,
+                countOfParticipants: lotteryInformation.countOfParticipants,
+                countOfTickets: lotteryInformation.countOfTickets,
+                endingtime: lotteryInformation.endingtime,
+                owner: lotteryInformation.owner,
+                ownerCommision: lotteryInformation.ownerCommision,
+                priceOfTicket: Number(ethers.utils.formatEther(lotteryInformation.priceOfTicket)),
+                prize: Number(ethers.utils.formatEther(lotteryInformation.prize)),
+                status: lotteryInformation.status,
+                winner: lotteryInformation.winner,
+                winnerIndex: lotteryInformation.winnerIndex,
+                count: 1
+            }
             dispatch(addAllLotteries(lotteryInformation))
         }
 

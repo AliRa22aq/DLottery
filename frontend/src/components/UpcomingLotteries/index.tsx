@@ -3,26 +3,53 @@ import { makeStyles } from '@mui/styles';
 import { LotteryTable } from './LotteryTable';
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from 'react-redux';
-import { DataType, addActiveLotteries } from '../Store';
+import { DataType, addActiveLotteries, LotteryData } from '../Store';
 
 const LotteryABI = require("../../abis/Lottery.json")
 
 const UpcomingLotteries = () => {
 
     const { masterContract } = useSelector((state: DataType) => state);
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const dispatch = useDispatch();
     const classes = useStyles();
-
+    
     const fetchActiveLotteriesData = async () => {
+        
+        let provider
+        
+        try{
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+        }
+        catch(e){
+            // console.log(e)
+            throw("No provider available")
+        }
 
         const lotteryContract = new ethers.Contract(masterContract.lotteryAddress, LotteryABI.abi, provider)
-        const counts = await lotteryContract.lotteriesCount();
+
+        // const counts = await lotteryContract.lotteriesCount();
         const activeLotteries = await lotteryContract.listOfActiveLotteriesID();
         activeLotteries.map(async (id: any) => {
             let lotteryInformation = await lotteryContract.lotteryInfo(id);
-            let newInfo = { ...lotteryInformation, count: 1 };
-            dispatch(addActiveLotteries(newInfo))
+            console.log("lotteryInformation ", lotteryInformation)
+            
+            const lotteryData: LotteryData = {
+                id: lotteryInformation.id,
+                accumulatedFunds: lotteryInformation.accumulatedFunds,
+                countOfParticipants: lotteryInformation.countOfParticipants,
+                countOfTickets: lotteryInformation.countOfTickets,
+                endingtime: lotteryInformation.endingtime,
+                owner: lotteryInformation.owner,
+                ownerCommision: lotteryInformation.ownerCommision,
+                priceOfTicket: Number(ethers.utils.formatEther(lotteryInformation.priceOfTicket)),
+                prize: lotteryInformation.prize,
+                status: lotteryInformation.status,
+                winner: lotteryInformation.winner,
+                winnerIndex: lotteryInformation.winnerIndex,
+                count: 1
+            }
+
+            dispatch(addActiveLotteries(lotteryData))
         })
     }
 
